@@ -1,5 +1,6 @@
 # boids
 
+## Proposal 
 We propose implementing a boids model for a flock/school/herd of birds/fish/animals. This would extend assignment 3’s physically-based animation. The final product would be an executable that runs a boid simulation in a simple 3-dimensional world.
 
 In particular, the project begins with implementing the 3 primary rules in Craig Reynolds’ original paper<sup>1</sup>:
@@ -18,7 +19,7 @@ A stretch goal would be allowing users to click locations in the rendering to dy
 Another extension for user interaction, time permitting, would be to add sliders allowing users to adjust the parameters of the various boid rules.
 
 
-References:
+## References
 
 <sup>1</sup> http://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 
