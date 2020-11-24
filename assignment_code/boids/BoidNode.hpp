@@ -16,6 +16,7 @@ class BoidNode : public SceneNode {
 
  private:
   void LoadMeshFile(const std::string& filename);
+  void UpdateNormals();
 
   std::shared_ptr<ShaderProgram> shader_;
   std::shared_ptr<VertexObject> mesh_;

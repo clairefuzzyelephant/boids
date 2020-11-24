@@ -13,6 +13,7 @@ class BoidApp : public Application {
   void SetupScene() override;
   void Update(double delta_time);
 
+// TODO: GUI for adjusting parameters?
 //  protected:
 //   void DrawGUI() override;
 

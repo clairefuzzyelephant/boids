@@ -14,6 +14,7 @@ BoidApp::BoidApp(const std::string& app_name,
 void BoidApp::SetupScene() {
   SceneNode& root = scene_->GetRootNode();
 
+  // TODO: customer perspective moving camera?
   auto camera_node = make_unique<ArcBallCameraNode>(45.f, 0.75f, 3.0f);
   scene_->ActivateCamera(camera_node->GetComponentPtr<CameraComponent>());
   root.AddChild(std::move(camera_node));
@@ -30,7 +31,7 @@ void BoidApp::SetupScene() {
   sun_light_node->CreateComponent<LightComponent>(sun_light);
   root.AddChild(std::move(sun_light_node));
 
-  auto boid_node = make_unique<BoidNode>("/pierog.obj");
+  auto boid_node = make_unique<BoidNode>("pierog.obj");
   boid_node_ptr_ = boid_node.get();
   root.AddChild(std::move(boid_node));
 }
