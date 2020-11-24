@@ -115,7 +115,7 @@ file(GLOB gloo_srcs
 
 ###################################################
 
-set(assignment_name "assignment${ASSIGNMENT_ID}")
+set(assignment_name "boids")
 set(assignment_dir ${PROJECT_SOURCE_DIR}/assignment_code/${assignment_name})
 set(assignment_common_dir ${PROJECT_SOURCE_DIR}/assignment_code/common)
 include_directories(${assignment_dir})
