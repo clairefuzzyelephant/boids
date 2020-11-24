@@ -19,6 +19,8 @@ class ArcBallCameraNode : public SceneNode {
   void PlaneTranslation(glm::dvec2 pos);
   void DistanceZoom(glm::dvec2 pos);
   void DistanceZoom(float delta);
+  void PlotAxes();
+  void ToggleAxes();
 
   float fov_;
   float distance_;
@@ -26,6 +28,9 @@ class ArcBallCameraNode : public SceneNode {
   glm::quat start_rotation_;
   float start_distance_;
   glm::dvec2 mouse_start_click_;
+  SceneNode* x_line_node_ptr_;
+  SceneNode* y_line_node_ptr_;
+  SceneNode* z_line_node_ptr_;
 };
 }  // namespace GLOO
 
