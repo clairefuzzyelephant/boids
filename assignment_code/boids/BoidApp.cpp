@@ -1,10 +1,13 @@
 #include "BoidApp.hpp"
+#include <iostream>
 
 #include "gloo/external.hpp"
 #include "gloo/cameras/ArcBallCameraNode.hpp"
 #include "gloo/lights/AmbientLight.hpp"
 #include "gloo/lights/DirectionalLight.hpp"
 #include "gloo/components/LightComponent.hpp"
+
+#include "glm/gtx/string_cast.hpp"
 
 namespace GLOO {
 BoidApp::BoidApp(const std::string& app_name,
@@ -20,7 +23,7 @@ void BoidApp::SetupScene() {
   root.AddChild(std::move(camera_node));
 
   auto ambient_light = std::make_shared<AmbientLight>();
-  ambient_light->SetAmbientColor(glm::vec3(0.2f));
+  ambient_light->SetAmbientColor(glm::vec3(0.1f));
   root.CreateComponent<LightComponent>(ambient_light);
 
   auto sun_light = std::make_shared<DirectionalLight>();
@@ -31,9 +34,18 @@ void BoidApp::SetupScene() {
   sun_light_node->CreateComponent<LightComponent>(sun_light);
   root.AddChild(std::move(sun_light_node));
 
-  auto boid_node = make_unique<BoidNode>("pierog.obj");
-  boid_node_ptr_ = boid_node.get();
-  root.AddChild(std::move(boid_node));
+//  auto boid_1 = make_unique<BoidNode>("pierog.obj", glm::vec3(0.f, 0.f, 0.f));
+//  root.AddChild(std::move(boid_1));
+//
+//  auto boid_2 = make_unique<BoidNode>("pierog.obj", glm::vec3(0.3f, 0.2f, 0.f));
+//  root.AddChild(std::move(boid_2));
+  
+  for (int i = 0; i < 5; i++) {
+    auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%3 * 0.2f, rand()%3 * 0.2f, rand()%3 * 0.2f));
+    flock_.addBoid(boid.get());
+    root.AddChild(std::move(boid));
+  }
+  flock_.flocking();
 }
 
 } // namespace GLOO

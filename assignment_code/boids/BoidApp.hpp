@@ -4,6 +4,7 @@
 #include "gloo/Application.hpp"
 
 #include "BoidNode.hpp"
+#include "Flock.hpp"
 
 namespace GLOO {
 class BoidApp : public Application {
@@ -19,6 +20,7 @@ class BoidApp : public Application {
 
  private:
   BoidNode* boid_node_ptr_;
+  Flock flock_;
 };
 }  // namespace GLOO
 
