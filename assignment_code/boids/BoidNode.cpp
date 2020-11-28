@@ -20,7 +20,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   mesh_node->SetActive(true);
   mesh_node_ = mesh_node.get();
   AddChild(std::move(mesh_node));
-  mesh_node_->GetTransform().SetScale(glm::vec3(0.01));
+  mesh_node_->GetTransform().SetScale(glm::vec3(0.005));
   mesh_node_->GetTransform().SetPosition(position);
   
   
