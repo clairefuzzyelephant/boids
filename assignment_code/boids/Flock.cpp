@@ -38,7 +38,7 @@ void Flock::flocking()
 
 void Flock::Update(double delta_time) {
   for (uint i = 0; i < flock.size(); i++)
-    flock[i]->Run(flock);
+    flock[i]->Run(flock, delta_time);
 }
 
 }

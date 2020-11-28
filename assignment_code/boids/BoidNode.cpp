@@ -27,11 +27,11 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   
   
   position_ = position;
-  velocity_ = glm::vec3(rand() % 10 /2.f, rand() % 10/2.f, rand()%10 /2.f);
+  velocity_ = glm::vec3(rand() % 10 /5.f, rand() % 10/5.f, rand()%10 /5.f);
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
   
-  max_speed_ = 5.f;
-  max_force_ = 3.f;
+  max_speed_ = 2.f;
+  max_force_ = 1.f;
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
@@ -49,14 +49,14 @@ void BoidNode::UpdateBoids(double delta_time) {
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
 }
 
-void BoidNode::Run(const std::vector<BoidNode*>& boids)
+void BoidNode::Run(const std::vector<BoidNode*>& boids, double delta_time)
 {
-    Flock(boids);
-    UpdateBoids(0.001);
+    Flock(boids, delta_time);
+    UpdateBoids(delta_time);
 //    borders();
 }
 
-void BoidNode::Flock(const std::vector<BoidNode*>& boids) {
+void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
   glm::vec3 separation = Separation(boids);
   glm::vec3 alignment = Alignment(boids);
   glm::vec3 cohesion = Cohesion(boids);
@@ -66,9 +66,9 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids) {
 //  std::cout << glm::to_string(cohesion) << std::endl;
 //  std::cout << "------" << std::endl;
   
-  AddForce(separation);
-  AddForce(alignment * 500.f);
-  AddForce(cohesion * 500.f);
+  AddForce(separation * (float)delta_time);
+  AddForce(alignment * (float)delta_time);
+  AddForce(cohesion * (float)delta_time);
 }
 
 void BoidNode::AddForce(glm::vec3 force) {
@@ -80,7 +80,7 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 0.5f;
+  float desiredseparation = 0.2f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
@@ -135,7 +135,7 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 
 glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 10.f; // Field of vision
+  float neighbordist = 5.f; // Field of vision
 
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
@@ -168,7 +168,7 @@ glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 // steering force to move in that direction.
 glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 50.f;
+  float neighbordist = 10.f;
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
