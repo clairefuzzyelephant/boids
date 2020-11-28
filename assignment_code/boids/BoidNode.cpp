@@ -7,6 +7,8 @@
 #include "gloo/components/RenderingComponent.hpp"
 #include "gloo/components/ShadingComponent.hpp"
 
+#include "glm/gtx/string_cast.hpp"
+
 namespace GLOO {
 BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : SceneNode() {
   LoadMeshFile(filename);
@@ -59,9 +61,14 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids) {
   glm::vec3 alignment = Alignment(boids);
   glm::vec3 cohesion = Cohesion(boids);
   
+//  std::cout << glm::to_string(separation) << std::endl;
+//  std::cout << glm::to_string(alignment) << std::endl;
+//  std::cout << glm::to_string(cohesion) << std::endl;
+//  std::cout << "------" << std::endl;
+  
   AddForce(separation);
-  AddForce(alignment);
-  AddForce(cohesion);
+  AddForce(alignment * 500.f);
+  AddForce(cohesion * 500.f);
 }
 
 void BoidNode::AddForce(glm::vec3 force) {
@@ -73,7 +80,7 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 0.1f;
+  float desiredseparation = 0.5f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
@@ -161,15 +168,15 @@ glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 // steering force to move in that direction.
 glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 10.f;
+  float neighbordist = 50.f;
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
-      float d = glm::distance(position_, boids[i]->position_);
-      if ((d > 0) && (d < neighbordist)) {
-          sum = sum + boids[i]->position_;
-          count++;
-      }
+    float d = glm::distance(position_, boids[i]->position_);
+    if ((d > 0) && (d < neighbordist)) {
+        sum = sum + boids[i]->position_;
+        count++;
+    }
   }
   if (count > 0) {
     sum = sum / (float)count;
@@ -186,13 +193,15 @@ glm::vec3 BoidNode::seek(const glm::vec3 v)
   glm::normalize(desired);
   desired = desired * max_speed_;
   // Steering = Desired minus Velocity
-  acceleration_ = desired - velocity_;
+  
+  glm::vec3 temp_accel;
+  temp_accel = desired - velocity_;
 
-  float accel_mag = glm::length(acceleration_);
+  float accel_mag = glm::length(temp_accel);
   if (accel_mag > max_force_) {
-    acceleration_ = acceleration_ / accel_mag;
+    temp_accel = temp_accel / accel_mag;
   }
-  return acceleration_;
+  return temp_accel;
 }
 
 void BoidNode::LoadMeshFile(const std::string& filename) {
