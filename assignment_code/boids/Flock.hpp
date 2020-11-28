@@ -16,11 +16,11 @@ class Flock {
 public:
   Flock();
   int getSize();
-  BoidNode getBoid(int i);
+  BoidNode* getBoid(int i);
   void addBoid(BoidNode* b);
   void flocking();
   
-  std::vector<BoidNode> flock;
+  std::vector<BoidNode*> flock;
 };
 
 }

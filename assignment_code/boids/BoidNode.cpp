@@ -42,14 +42,14 @@ void BoidNode::UpdateBoids(double delta_time) {
   
 }
 
-void BoidNode::Run(const std::vector <BoidNode>& boids)
+void BoidNode::Run(const std::vector<BoidNode*>& boids)
 {
     Flock(boids);
     UpdateBoids(0.001);
 //    borders();
 }
 
-void BoidNode::Flock(const std::vector<BoidNode>& boids) {
+void BoidNode::Flock(const std::vector<BoidNode*>& boids) {
   glm::vec3 separation = Separation(boids);
   glm::vec3 alignment = Alignment(boids);
   glm::vec3 cohesion = Cohesion(boids);
@@ -65,19 +65,19 @@ void BoidNode::AddForce(glm::vec3 force) {
 
 // Separation
 // Keeps boids from getting too close to one another
-glm::vec3 BoidNode::Separation(const std::vector<BoidNode>& boids)
+glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
   float desiredseparation = 20;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
-  for (int i = 0; i < boids.size(); i++) {
+  for (uint i = 0; i < boids.size(); i++) {
       // Calculate distance from current boid to boid we're looking at
-      float d = glm::distance(position_, boids[i].position_);
+      float d = glm::distance(position_, boids[i]->position_);
       // If this is a fellow boid and it's too close, move away from it
       if ((d > 0) && (d < desiredseparation)) {
-          glm::vec3 diff = position_ -  boids[i].position_;
+          glm::vec3 diff = position_ -  boids[i]->position_;
           glm::normalize(diff);
           diff = diff/d;
           steer = steer + diff;
@@ -121,16 +121,16 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode>& boids)
   return steer;
 }
 
-glm::vec3 BoidNode::Alignment(const std::vector<BoidNode>& boids)
+glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 {
   float neighbordist = 50; // Field of vision
 
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
-  for (int i = 0; i < boids.size(); i++) {
-      float d = glm::distance(position_, boids[i].position_);
+  for (uint i = 0; i < boids.size(); i++) {
+      float d = glm::distance(position_, boids[i]->position_);
       if ((d > 0) && (d < neighbordist)) { // 0 < d < 50
-          sum = sum + boids[i].velocity_;
+          sum = sum + boids[i]->velocity_;
           count++;
       }
   }
@@ -154,15 +154,15 @@ glm::vec3 BoidNode::Alignment(const std::vector<BoidNode>& boids)
 // Cohesion
 // Finds the average location of nearby boids and manipulates the
 // steering force to move in that direction.
-glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode>& boids)
+glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
 {
   float neighbordist = 50;
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
-  for (int i = 0; i < boids.size(); i++) {
-      float d = glm::distance(position_, boids[i].position_);
+  for (uint i = 0; i < boids.size(); i++) {
+      float d = glm::distance(position_, boids[i]->position_);
       if ((d > 0) && (d < neighbordist)) {
-          sum = sum + boids[i].position_;
+          sum = sum + boids[i]->position_;
           count++;
       }
   }
@@ -189,8 +189,6 @@ glm::vec3 BoidNode::seek(const glm::vec3 v)
   }
   return acceleration_;
 }
-
-
 
 void BoidNode::LoadMeshFile(const std::string& filename) {
   std::shared_ptr<VertexObject> vtx_obj =

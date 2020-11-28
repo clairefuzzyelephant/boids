@@ -34,12 +34,6 @@ void BoidApp::SetupScene() {
   sun_light_node->CreateComponent<LightComponent>(sun_light);
   root.AddChild(std::move(sun_light_node));
 
-//  auto boid_1 = make_unique<BoidNode>("pierog.obj", glm::vec3(0.f, 0.f, 0.f));
-//  root.AddChild(std::move(boid_1));
-//
-//  auto boid_2 = make_unique<BoidNode>("pierog.obj", glm::vec3(0.3f, 0.2f, 0.f));
-//  root.AddChild(std::move(boid_2));
-  
   for (int i = 0; i < 5; i++) {
     auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%3 * 0.2f, rand()%3 * 0.2f, rand()%3 * 0.2f));
     flock_.addBoid(boid.get());

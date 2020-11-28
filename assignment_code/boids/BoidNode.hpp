@@ -13,7 +13,7 @@ class BoidNode : public SceneNode {
  public:
   BoidNode(const std::string& filename, const glm::vec3 position);
   void UpdateBoids(double delta_time);
-  void Run(const std::vector <BoidNode>& boids);
+  void Run(const std::vector<BoidNode*>& boids);
   
   glm::vec3 position_;
   glm::vec3 velocity_;
@@ -23,10 +23,10 @@ class BoidNode : public SceneNode {
   void LoadMeshFile(const std::string& filename);
   void AddForce(glm::vec3 force);
   
-  void Flock(const std::vector<BoidNode>& boids);
-  glm::vec3 Separation(const std::vector<BoidNode>& boids);
-  glm::vec3 Alignment(const std::vector<BoidNode>& boids);
-  glm::vec3 Cohesion(const std::vector<BoidNode>& boids);
+  void Flock(const std::vector<BoidNode*>& boids);
+  glm::vec3 Separation(const std::vector<BoidNode*>& boids);
+  glm::vec3 Alignment(const std::vector<BoidNode*>& boids);
+  glm::vec3 Cohesion(const std::vector<BoidNode*>& boids);
   glm::vec3 seek(const glm::vec3 v);
   
   std::shared_ptr<ShaderProgram> shader_;
