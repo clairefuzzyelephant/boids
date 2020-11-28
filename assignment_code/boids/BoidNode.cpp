@@ -25,19 +25,18 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   
   
   position_ = position;
-  velocity_ = glm::vec3(0.f, 0.f, 0.f);
-//  velocity_ = glm::vec3(rand()/2.f, rand()/2.f, rand()/2.f);
+  velocity_ = glm::vec3(rand() % 10 /2.f, rand() % 10/2.f, rand()%10 /2.f);
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
   
-  max_speed_ = 0.5f;
-  max_force_ = 0.1f;
+  max_speed_ = 5.f;
+  max_force_ = 3.f;
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
   // TODO: implement rules and call them here
   acceleration_ = acceleration_ * 0.5f; //dampen
-  velocity_ = velocity_ + acceleration_;
-  position_ = position_ + velocity_;
+  velocity_ = velocity_ + (acceleration_ * (float)delta_time);
+  position_ = position_ + (velocity_ * (float)delta_time);
   mesh_node_->GetTransform().SetPosition(position_);
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
 }
@@ -68,7 +67,7 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 0.5f;
+  float desiredseparation = 0.1f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
@@ -123,7 +122,7 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 
 glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 0.1f; // Field of vision
+  float neighbordist = 10.f; // Field of vision
 
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
@@ -156,7 +155,7 @@ glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 // steering force to move in that direction.
 glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 5.f;
+  float neighbordist = 10.f;
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
