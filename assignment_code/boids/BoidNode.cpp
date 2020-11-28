@@ -38,6 +38,12 @@ void BoidNode::UpdateBoids(double delta_time) {
   velocity_ = velocity_ + (acceleration_ * (float)delta_time);
   position_ = position_ + (velocity_ * (float)delta_time);
   mesh_node_->GetTransform().SetPosition(position_);
+
+  // From assignment2
+  auto unit_y = glm::vec3(0.0f, 1.0f, 0.0f);
+  float theta = glm::acos(glm::dot(velocity_, unit_y)/glm::length(velocity_)) + 3.14f/2.f;
+  mesh_node_->GetTransform().SetRotation(glm::normalize(glm::cross(glm::vec3(unit_y), velocity_)), theta);
+
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
 }
 
