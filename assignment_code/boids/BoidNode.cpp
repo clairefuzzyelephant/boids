@@ -24,14 +24,13 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   AddChild(std::move(mesh_node));
   mesh_node_->GetTransform().SetScale(glm::vec3(0.005));
   mesh_node_->GetTransform().SetPosition(position);
-  
-  
+
   position_ = position;
-  velocity_ = glm::vec3(rand() % 10 /5.f, rand() % 10/5.f, rand()%10 /5.f);
+  velocity_ = glm::vec3(rand() % 10 /7.f, rand() % 10/7.f, rand()%10 /7.f);
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
   
-  max_speed_ = 2.f;
-  max_force_ = 1.f;
+  max_speed_ = 1.f;
+  max_force_ = 0.1f;
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
@@ -59,16 +58,16 @@ void BoidNode::Run(const std::vector<BoidNode*>& boids, double delta_time)
 void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
   glm::vec3 separation = Separation(boids);
   glm::vec3 alignment = Alignment(boids);
-  glm::vec3 cohesion = Cohesion(boids);
+  glm::vec3 cohesion = Cohesion(boids) * 2.f;
   
-//  std::cout << glm::to_string(separation) << std::endl;
-//  std::cout << glm::to_string(alignment) << std::endl;
-//  std::cout << glm::to_string(cohesion) << std::endl;
-//  std::cout << "------" << std::endl;
+  std::cout << glm::to_string(separation) << std::endl;
+  std::cout << glm::to_string(alignment) << std::endl;
+  std::cout << glm::to_string(cohesion) << std::endl;
+  std::cout << "------" << std::endl;
   
-  AddForce(separation * (float)delta_time);
-  AddForce(alignment * (float)delta_time);
-  AddForce(cohesion * (float)delta_time);
+//  AddForce(separation * 0.5f * (float)delta_time);
+  AddForce(alignment * 1.f * (float)delta_time);
+  AddForce(cohesion * 1.f * (float)delta_time);
 }
 
 void BoidNode::AddForce(glm::vec3 force) {
@@ -80,7 +79,7 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 0.2f;
+  float desiredseparation = 0.1f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
@@ -95,26 +94,7 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
           steer = steer + diff;
           count++;
       }
-      // If current boid is a predator and the boid we're looking at is also
-      // a predator, then separate only slightly
-//        if ((d > 0) && (d < desiredseparation) && predator == true
-//            && boids[i].predator == true) {
-//            Pvector pred2pred(0, 0);
-//            pred2pred = pred2pred.subTwoVector(location, boids[i].location);
-//            pred2pred.normalize();
-//            pred2pred.divScalar(d);
-//            steer.addVector(pred2pred);
-//            count++;
-//        }
-      // If current boid is not a predator, but the boid we're looking at is
-      // a predator, then create a large separation Pvector
-//        else if ((d > 0) && (d < desiredseparation+70) && boids[i].predator == true) {
-//            Pvector pred(0, 0);
-//            pred = pred.subTwoVector(location, boids[i].location);
-//            pred.mulScalar(900);
-//            steer.addVector(pred);
-//            count++;
-//        }
+
   }
   // Adds average difference of location to acceleration
   if (count > 0)
@@ -135,7 +115,7 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 
 glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 5.f; // Field of vision
+  float neighbordist = 50.f; // Field of vision
 
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
@@ -168,11 +148,12 @@ glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 // steering force to move in that direction.
 glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 10.f;
+  float neighbordist = 50.f;
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
     float d = glm::distance(position_, boids[i]->position_);
+    std::cout << d << std::endl;
     if ((d > 0) && (d < neighbordist)) {
         sum = sum + boids[i]->position_;
         count++;

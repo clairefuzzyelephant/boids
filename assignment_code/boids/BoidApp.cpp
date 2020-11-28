@@ -37,7 +37,7 @@ void BoidApp::SetupScene() {
   flock_ = make_unique<Flock>();
   
   srand(3);
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 3; i++) {
     auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f));
     flock_->addBoid(boid.get());
     root.AddChild(std::move(boid));
