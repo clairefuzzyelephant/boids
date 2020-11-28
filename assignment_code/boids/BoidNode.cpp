@@ -26,7 +26,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   mesh_node_->GetTransform().SetPosition(position);
 
   position_ = position;
-  velocity_ = glm::vec3(rand() % 10 /7.f, rand() % 10/7.f, rand()%10 /7.f);
+  velocity_ = glm::vec3(0);
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
   
   max_speed_ = 1.f;
@@ -43,7 +43,7 @@ void BoidNode::UpdateBoids(double delta_time) {
   // From assignment2
   auto unit_y = glm::vec3(0.0f, 1.0f, 0.0f);
   float theta = glm::acos(glm::dot(velocity_, unit_y)/glm::length(velocity_)) + 3.14f/2.f;
-  mesh_node_->GetTransform().SetRotation(glm::normalize(glm::cross(glm::vec3(unit_y), velocity_)), theta);
+  // mesh_node_->GetTransform().SetRotation(glm::normalize(glm::cross(glm::vec3(unit_y), velocity_)), theta);
 
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
 }
@@ -65,9 +65,9 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
   std::cout << glm::to_string(cohesion) << std::endl;
   std::cout << "------" << std::endl;
   
-//  AddForce(separation * 0.5f * (float)delta_time);
-  AddForce(alignment * 1.f * (float)delta_time);
-  AddForce(cohesion * 1.f * (float)delta_time);
+  AddForce(separation * (float)delta_time * 100.f);
+  AddForce(alignment * (float)delta_time * 100.f);
+  AddForce(cohesion * (float)delta_time * 100.f);
 }
 
 void BoidNode::AddForce(glm::vec3 force) {
@@ -94,7 +94,6 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
           steer = steer + diff;
           count++;
       }
-
   }
   // Adds average difference of location to acceleration
   if (count > 0)
@@ -160,29 +159,19 @@ glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
     }
   }
   if (count > 0) {
-    sum = sum / (float)count;
+    sum = sum / float(count);
     return seek(sum);
   } else {
     return glm::vec3(0.f, 0.f, 0.f);
   }
 }
 
-glm::vec3 BoidNode::seek(const glm::vec3 v)
+glm::vec3 BoidNode::seek(const glm::vec3 desired)
 {
-  glm::vec3 desired = -v; //????
-  // Normalize desired and scale to maximum speed
-  glm::normalize(desired);
-  desired = desired * max_speed_;
-  // Steering = Desired minus Velocity
-  
-  glm::vec3 temp_accel;
-  temp_accel = desired - velocity_;
+  glm::vec3 dir = desired - position_;
 
-  float accel_mag = glm::length(temp_accel);
-  if (accel_mag > max_force_) {
-    temp_accel = temp_accel / accel_mag;
-  }
-  return temp_accel;
+  // TODO: maximum
+  return dir;
 }
 
 void BoidNode::LoadMeshFile(const std::string& filename) {
