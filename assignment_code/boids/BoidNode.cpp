@@ -25,11 +25,12 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   
   
   position_ = position;
-  velocity_ = glm::vec3(rand()%3-2.f, rand()%3-2.f, rand()%3-2.f);
+  velocity_ = glm::vec3(0.f, 0.f, 0.f);
+//  velocity_ = glm::vec3(rand()/2.f, rand()/2.f, rand()/2.f);
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
   
-  max_speed_ = 3.f;
-  max_force_ = 1.f;
+  max_speed_ = 0.5f;
+  max_force_ = 0.1f;
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
@@ -37,6 +38,7 @@ void BoidNode::UpdateBoids(double delta_time) {
   acceleration_ = acceleration_ * 0.5f; //dampen
   velocity_ = velocity_ + acceleration_;
   position_ = position_ + velocity_;
+  mesh_node_->GetTransform().SetPosition(position_);
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
 }
 
@@ -66,7 +68,7 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 20;
+  float desiredseparation = 0.5f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
@@ -121,7 +123,7 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 
 glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 50; // Field of vision
+  float neighbordist = 0.1f; // Field of vision
 
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
@@ -154,7 +156,7 @@ glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
 // steering force to move in that direction.
 glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
 {
-  float neighbordist = 50;
+  float neighbordist = 5.f;
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
@@ -165,10 +167,10 @@ glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
       }
   }
   if (count > 0) {
-      sum = sum / (float)count;
-      return seek(sum);
+    sum = sum / (float)count;
+    return seek(sum);
   } else {
-      return glm::vec3(0.f, 0.f, 0.f);
+    return glm::vec3(0.f, 0.f, 0.f);
   }
 }
 

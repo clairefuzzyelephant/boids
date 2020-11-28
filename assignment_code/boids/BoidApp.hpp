@@ -20,7 +20,7 @@ class BoidApp : public Application {
 
  private:
   BoidNode* boid_node_ptr_;
-  Flock flock_;
+  std::unique_ptr<Flock> flock_;
 };
 }  // namespace GLOO
 

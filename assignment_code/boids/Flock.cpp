@@ -32,6 +32,11 @@ void Flock::addBoid(BoidNode* b)
 // itself. Which in turn applies all the rules to the flock.
 void Flock::flocking()
 {
+//  for (uint i = 0; i < flock.size(); i++)
+//    flock[i]->Run(flock);
+}
+
+void Flock::Update(double delta_time) {
   for (uint i = 0; i < flock.size(); i++)
     flock[i]->Run(flock);
 }
