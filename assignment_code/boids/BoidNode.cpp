@@ -60,11 +60,6 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
   glm::vec3 alignment = Alignment(boids);
   glm::vec3 cohesion = Cohesion(boids) * 2.f;
   
-  std::cout << glm::to_string(separation) << std::endl;
-  std::cout << glm::to_string(alignment) << std::endl;
-  std::cout << glm::to_string(cohesion) << std::endl;
-  std::cout << "------" << std::endl;
-  
   AddForce(separation * (float)delta_time * 100.f);
   AddForce(alignment * (float)delta_time * 100.f);
   AddForce(cohesion * (float)delta_time * 100.f);
