@@ -15,7 +15,8 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   auto mesh_node = make_unique<SceneNode>();
   mesh_node->CreateComponent<ShadingComponent>(shader_);
   mesh_node->CreateComponent<RenderingComponent>(mesh_);
-  mesh_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+  auto mat = mesh_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+  mat.GetMaterial().SetDiffuseColor(glm::vec3(197, 172, 112)/255.f);
   mesh_node->SetActive(true);
   mesh_node_ = mesh_node.get();
   AddChild(std::move(mesh_node));
@@ -37,9 +38,6 @@ void BoidNode::UpdateBoids(double delta_time) {
   velocity_ = velocity_ + acceleration_;
   position_ = position_ + velocity_;
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
-  
-  
-  
 }
 
 void BoidNode::Run(const std::vector<BoidNode*>& boids)
