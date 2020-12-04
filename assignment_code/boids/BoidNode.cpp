@@ -74,7 +74,7 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 0.1f;
+  float desiredseparation = 0.3f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
@@ -147,7 +147,6 @@ glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
     float d = glm::distance(position_, boids[i]->position_);
-    std::cout << d << std::endl;
     if ((d > 0) && (d < neighbordist)) {
         sum = sum + boids[i]->position_;
         count++;
