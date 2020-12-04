@@ -6,6 +6,7 @@
 #include "gloo/lights/AmbientLight.hpp"
 #include "gloo/lights/DirectionalLight.hpp"
 #include "gloo/components/LightComponent.hpp"
+#include "gloo/debug/AxisNode.hpp"
 
 #include "glm/gtx/string_cast.hpp"
 
@@ -21,6 +22,8 @@ void BoidApp::SetupScene() {
   auto camera_node = make_unique<ArcBallCameraNode>(45.f, 0.75f, 3.0f);
   scene_->ActivateCamera(camera_node->GetComponentPtr<CameraComponent>());
   root.AddChild(std::move(camera_node));
+
+  root.AddChild(make_unique<AxisNode>('A'));
 
   auto ambient_light = std::make_shared<AmbientLight>();
   ambient_light->SetAmbientColor(glm::vec3(0.1f));
