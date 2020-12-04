@@ -13,22 +13,27 @@ namespace GLOO {
 BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : SceneNode() {
   LoadMeshFile(filename);
   shader_ = std::make_shared<PhongShader>();
+  auto offset = glm::vec3(-0.1, -0.03, -0.17);
 
   auto mesh_node = make_unique<SceneNode>();
-  mesh_node->CreateComponent<ShadingComponent>(shader_);
-  mesh_node->CreateComponent<RenderingComponent>(mesh_);
-  auto mat = mesh_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+  auto inner_node = make_unique<SceneNode>();
+  inner_node->CreateComponent<ShadingComponent>(shader_);
+  inner_node->CreateComponent<RenderingComponent>(mesh_);
+  auto mat = inner_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
   mat.GetMaterial().SetDiffuseColor(glm::vec3(197, 172, 112)/255.f);
-  mesh_node->SetActive(true);
+  // Inner node necessary to fix .obj being slightly off center. Offset here fixes.
+  inner_node->GetTransform().SetPosition(offset/5.f);
+  // If changing scale, may need to change offset proportionally
+  inner_node->GetTransform().SetScale(glm::vec3(0.001));
+
+  mesh_node->AddChild(std::move(inner_node));
   mesh_node_ = mesh_node.get();
   AddChild(std::move(mesh_node));
-  mesh_node_->GetTransform().SetScale(glm::vec3(0.005));
   mesh_node_->GetTransform().SetPosition(position);
 
-  offset_ = glm::vec3(-0.1, -0.03, -0.17);
   position_ = position;
   velocity_ = glm::vec3(0);
-  acceleration_ = glm::vec3(0.f, 0.f, 0.f);
+  acceleration_ = glm::vec3(0);
   
   max_speed_ = 1.f;
   max_force_ = 0.1f;
@@ -39,12 +44,9 @@ void BoidNode::UpdateBoids(double delta_time) {
   acceleration_ = acceleration_ * 0.5f; //dampen
   velocity_ = velocity_ + (acceleration_ * (float)delta_time);
   position_ = position_ + (velocity_ * (float)delta_time);
-  mesh_node_->GetTransform().SetPosition(position_ + offset_);
+  mesh_node_->GetTransform().SetPosition(position_);
 
-  // From assignment2
-  // auto unit_y = glm::vec3(0.0f, 1.0f, 0.0f);
-  // float theta = glm::acos(glm::dot(velocity_, unit_y)/glm::length(velocity_)) + 3.14f/2.f;
-  glm::quat rot = glm::quat(glm::lookAt(position_, position_ + velocity_, glm::vec3(0, 1, 0)));
+  glm::quat rot = glm::quat(glm::vec3(0, -3.14/2.f, 0)) * glm::quatLookAt(glm::normalize(velocity_), glm::vec3(0, 1, 0));
   mesh_node_->GetTransform().SetRotation(rot);
 
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
