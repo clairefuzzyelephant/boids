@@ -18,6 +18,7 @@ class BoidNode : public SceneNode {
   glm::vec3 position_;
   glm::vec3 velocity_;
   glm::vec3 acceleration_;
+  glm::vec3 offset_;
 
  private:
   void LoadMeshFile(const std::string& filename);

@@ -25,6 +25,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   mesh_node_->GetTransform().SetScale(glm::vec3(0.005));
   mesh_node_->GetTransform().SetPosition(position);
 
+  offset_ = glm::vec3(-0.1, -0.03, -0.17);
   position_ = position;
   velocity_ = glm::vec3(0);
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
@@ -38,12 +39,13 @@ void BoidNode::UpdateBoids(double delta_time) {
   acceleration_ = acceleration_ * 0.5f; //dampen
   velocity_ = velocity_ + (acceleration_ * (float)delta_time);
   position_ = position_ + (velocity_ * (float)delta_time);
-  mesh_node_->GetTransform().SetPosition(position_);
+  mesh_node_->GetTransform().SetPosition(position_ + offset_);
 
   // From assignment2
-  auto unit_y = glm::vec3(0.0f, 1.0f, 0.0f);
-  float theta = glm::acos(glm::dot(velocity_, unit_y)/glm::length(velocity_)) + 3.14f/2.f;
-  // mesh_node_->GetTransform().SetRotation(glm::normalize(glm::cross(glm::vec3(unit_y), velocity_)), theta);
+  // auto unit_y = glm::vec3(0.0f, 1.0f, 0.0f);
+  // float theta = glm::acos(glm::dot(velocity_, unit_y)/glm::length(velocity_)) + 3.14f/2.f;
+  glm::quat rot = glm::quat(glm::lookAt(position_, position_ + velocity_, glm::vec3(0, 1, 0)));
+  mesh_node_->GetTransform().SetRotation(rot);
 
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
 }
@@ -147,7 +149,6 @@ glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
     float d = glm::distance(position_, boids[i]->position_);
-    std::cout << d << std::endl;
     if ((d > 0) && (d < neighbordist)) {
         sum = sum + boids[i]->position_;
         count++;
