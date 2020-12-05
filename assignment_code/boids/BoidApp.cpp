@@ -50,10 +50,10 @@ void BoidApp::SetupScene() {
 
 void BoidApp::AddBorders(SceneNode& root) {
   auto shader = std::make_shared<SimpleShader>();
-  auto color = glm::vec3(50, 50, 50)/255.f;
+  auto top_bottom_color = glm::vec3(255, 255, 255)/255.f;
 
   auto floor = make_unique<VertexObject>();
-  float fw = 10; // floor width
+  float fw = 4; // floor width
   auto positions = make_unique<PositionArray>();
   positions->push_back(glm::vec3(fw, -2, fw));
   positions->push_back(glm::vec3(-fw, -2, -fw));
@@ -77,15 +77,15 @@ void BoidApp::AddBorders(SceneNode& root) {
   floor_node->CreateComponent<ShadingComponent>(shader);
   floor_node->CreateComponent<RenderingComponent>(std::move(floor));
   auto mat = floor_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
-  mat.GetMaterial().SetDiffuseColor(color);
+  mat.GetMaterial().SetDiffuseColor(top_bottom_color);
   root.AddChild(std::move(floor_node));
   
   auto ceiling = make_unique<VertexObject>();
   positions = make_unique<PositionArray>();
-  positions->push_back(glm::vec3(fw, 4, fw));
-  positions->push_back(glm::vec3(-fw, 4, -fw));
-  positions->push_back(glm::vec3(fw, 4, -fw));
-  positions->push_back(glm::vec3(-fw, 4, fw));
+  positions->push_back(glm::vec3(fw, 2, fw));
+  positions->push_back(glm::vec3(-fw, 2, -fw));
+  positions->push_back(glm::vec3(fw, 2, -fw));
+  positions->push_back(glm::vec3(-fw, 2, fw));
   ceiling->UpdatePositions(std::move(positions));
   indices = make_unique<IndexArray>();
   indices->push_back(0);
@@ -104,8 +104,93 @@ void BoidApp::AddBorders(SceneNode& root) {
   ceiling_node->CreateComponent<ShadingComponent>(shader);
   ceiling_node->CreateComponent<RenderingComponent>(std::move(ceiling));
   mat = ceiling_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
-  mat.GetMaterial().SetDiffuseColor(color);
+  mat.GetMaterial().SetDiffuseColor(top_bottom_color);
   root.AddChild(std::move(ceiling_node));
+
+  auto right_left_color = glm::vec3(100.f, 100.f, 100.f)/255.f;
+
+  auto right_wall = make_unique<VertexObject>();
+  positions = make_unique<PositionArray>();
+  positions->push_back(glm::vec3(fw, 2, -fw));
+  positions->push_back(glm::vec3(fw, -2, fw));
+  positions->push_back(glm::vec3(fw, 2, fw));
+  positions->push_back(glm::vec3(fw, -2, -fw));
+  right_wall->UpdatePositions(std::move(positions));
+  indices = make_unique<IndexArray>();
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(2);
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(3);
+  right_wall->UpdateIndices(std::move(indices));
+  normals = make_unique<NormalArray>();
+  normals->push_back(glm::vec3(1, 0, 0));
+  normals->push_back(glm::vec3(1, 0, 0));
+  right_wall->UpdateNormals(std::move(normals));
+
+  auto right_wall_node = make_unique<SceneNode>();
+  right_wall_node->CreateComponent<ShadingComponent>(shader);
+  right_wall_node->CreateComponent<RenderingComponent>(std::move(right_wall));
+  mat = right_wall_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+  mat.GetMaterial().SetDiffuseColor(right_left_color);
+  root.AddChild(std::move(right_wall_node));
+
+  auto left_wall = make_unique<VertexObject>();
+  positions = make_unique<PositionArray>();
+  positions->push_back(glm::vec3(-fw, 2, -fw));
+  positions->push_back(glm::vec3(-fw, -2, fw));
+  positions->push_back(glm::vec3(-fw, 2, fw));
+  positions->push_back(glm::vec3(-fw, -2, -fw));
+  left_wall->UpdatePositions(std::move(positions));
+  indices = make_unique<IndexArray>();
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(2);
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(3);
+  left_wall->UpdateIndices(std::move(indices));
+  normals = make_unique<NormalArray>();
+  normals->push_back(glm::vec3(1, 0, 0));
+  normals->push_back(glm::vec3(1, 0, 0));
+  left_wall->UpdateNormals(std::move(normals));
+
+  auto left_wall_node = make_unique<SceneNode>();
+  left_wall_node->CreateComponent<ShadingComponent>(shader);
+  left_wall_node->CreateComponent<RenderingComponent>(std::move(left_wall));
+  mat = left_wall_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+  mat.GetMaterial().SetDiffuseColor(right_left_color);
+  root.AddChild(std::move(left_wall_node));
+
+  auto back_color = glm::vec3(50.f, 50.f, 50.f)/255.f;
+
+  auto back_wall = make_unique<VertexObject>();
+  positions = make_unique<PositionArray>();
+  positions->push_back(glm::vec3(-fw, 2, -fw));
+  positions->push_back(glm::vec3(fw, -2, -fw));
+  positions->push_back(glm::vec3(fw, 2, -fw));
+  positions->push_back(glm::vec3(-fw, -2, -fw));
+  back_wall->UpdatePositions(std::move(positions));
+  indices = make_unique<IndexArray>();
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(2);
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(3);
+  back_wall->UpdateIndices(std::move(indices));
+  normals = make_unique<NormalArray>();
+  normals->push_back(glm::vec3(1, 0, 0));
+  normals->push_back(glm::vec3(1, 0, 0));
+  back_wall->UpdateNormals(std::move(normals));
+
+  auto back_wall_node = make_unique<SceneNode>();
+  back_wall_node->CreateComponent<ShadingComponent>(shader);
+  back_wall_node->CreateComponent<RenderingComponent>(std::move(back_wall));
+  mat = back_wall_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+  mat.GetMaterial().SetDiffuseColor(back_color);
+  root.AddChild(std::move(back_wall_node));
 
 }
 } // namespace GLOO

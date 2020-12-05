@@ -35,14 +35,18 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   velocity_ = glm::vec3(0);
   acceleration_ = glm::vec3(0);
   
-  max_speed_ = 10.f;
-  max_force_ = .1f;
+  max_speed_ = 5.f;
+  max_force_ = 0.1f;
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
   // TODO: implement rules and call them here
   acceleration_ = acceleration_ * 0.5f; //dampen
   velocity_ = velocity_ + (acceleration_ * (float)delta_time);
+  if (glm::length(velocity_) > max_speed_) {
+    velocity_ = glm::normalize(velocity_) * 5.f;
+  }
+  // std::cout << "velocity" << glm::to_string(velocity_) << std::endl;
   position_ = position_ + (velocity_ * (float)delta_time);
   mesh_node_->GetTransform().SetPosition(position_);
 
@@ -50,13 +54,14 @@ void BoidNode::UpdateBoids(double delta_time) {
   mesh_node_->GetTransform().SetRotation(rot);
 
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
+  
 }
 
 void BoidNode::Run(const std::vector<BoidNode*>& boids, double delta_time)
 {
     Flock(boids, delta_time);
     UpdateBoids(delta_time);
-//    borders();
+    // std::cout << "position" << glm::to_string(position_) << std::endl;
 }
 
 void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
@@ -67,7 +72,7 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
   
   AddForce(separation * (float)delta_time * 100.f);
   AddForce(alignment * (float)delta_time * 100.f);
-  AddForce(cohesion * (float)delta_time * 200.f);
+  AddForce(cohesion * (float)delta_time * 300.f);
   AddForce(avoidance * (float)delta_time * 100.f);
 }
 
@@ -90,7 +95,9 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
       // If this is a fellow boid and it's too close, move away from it
       if ((d > 0) && (d < desiredseparation)) {
           glm::vec3 diff = position_ -  boids[i]->position_;
-          glm::normalize(diff);
+          if (glm::length(diff) > 0) {
+            diff = glm::normalize(diff);
+          }
           diff = diff/d;
           steer = steer + diff;
           count++;
@@ -129,7 +136,9 @@ glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
   // If there are boids close enough for alignment...
   if (count > 0) {
       sum = sum /(float)count;
-      glm::normalize(sum);
+      if (glm::length(sum) > 0) {
+        sum = glm::normalize(sum);
+      }
       sum = sum * max_speed_;
       glm::vec3 steer = sum - velocity_;
       float steer_mag = glm::length(steer);
@@ -168,17 +177,37 @@ glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
 
 glm::vec3 BoidNode::Avoidance()
 {
-  float repulsion = 0.1;
-  float floor_y = -2;
-  float ceiling_y = 4;
   glm::vec3 force = glm::vec3(0);
+
+  float floor_y = -2;
+  float ceiling_y = 2;
   if (position_.y < floor_y + 1) {
-    return force += glm::vec3(0, -position_.y/(position_.y-floor_y), 0);
+    force += glm::vec3(0, -position_.y/(position_.y-floor_y), 0);
   }
   if (position_.y > ceiling_y - 1) {
-    return force += glm::vec3(0, position_.y/(position_.y-ceiling_y), 0);
+    force += glm::vec3(0, position_.y/(position_.y-ceiling_y), 0);
   }
+
+  float right_x = 2;
+  float left_x = -2;
+  if (position_.x < left_x + 1) {
+    force += glm::vec3(-position_.x/(position_.x-left_x), 0, 0);
+  }
+  if (position_.x > right_x - 1) {
+    force += glm::vec3(position_.x/(position_.x-right_x), 0, 0);
+  }
+
+  float close_z = 2;
+  float far_z = -2;
+  if (position_.z < far_z + 1) {
+    force += glm::vec3(0, 0, -position_.z/(position_.z-far_z));
+  }
+  if (position_.z > close_z - 1) {
+    force += glm::vec3(0, 0, position_.z/(position_.z-close_z));
+  }
+  return force;
 }
+
 
 glm::vec3 BoidNode::seek(const glm::vec3 desired)
 {

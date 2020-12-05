@@ -10,7 +10,7 @@
 namespace GLOO {
 
 Flock::Flock() {
-  for (int i = 0; i < 25; i++) {
+  for (int i = 0; i < 10; i++) {
     auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f));
     addBoid(boid.get());
     AddChild(std::move(boid));
