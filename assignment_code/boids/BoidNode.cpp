@@ -20,11 +20,11 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   inner_node->CreateComponent<ShadingComponent>(shader_);
   inner_node->CreateComponent<RenderingComponent>(mesh_);
   auto mat = inner_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
-  mat.GetMaterial().SetDiffuseColor(glm::vec3(197, 172, 112)/255.f);
+  mat.GetMaterial().SetDiffuseColor(glm::vec3(245.f, 233.f, 154.f)/255.f);
   // Inner node necessary to fix .obj being slightly off center. Offset here fixes.
-  inner_node->GetTransform().SetPosition(offset/2.5f);
+  inner_node->GetTransform().SetPosition(offset/6.25f);
   // If changing scale, may need to change offset proportionally
-  inner_node->GetTransform().SetScale(glm::vec3(0.002));
+  inner_node->GetTransform().SetScale(glm::vec3(0.005));
 
   mesh_node->AddChild(std::move(inner_node));
   mesh_node_ = mesh_node.get();
@@ -32,7 +32,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   mesh_node_->GetTransform().SetPosition(position);
 
   position_ = position;
-  velocity_ = glm::vec3(0);
+  velocity_ = glm::vec3(rand()%10 * 0.1f, rand()%10 * 0.1f, rand()%10 * 0.1f);
   acceleration_ = glm::vec3(0);
   
   max_speed_ = 5.f;
@@ -40,14 +40,22 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
-  // TODO: implement rules and call them here
   acceleration_ = acceleration_ * 0.5f; //dampen
   velocity_ = velocity_ + (acceleration_ * (float)delta_time);
   if (glm::length(velocity_) > max_speed_) {
-    velocity_ = glm::normalize(velocity_) * 5.f;
+    velocity_ = glm::normalize(velocity_) * 4.f;
   }
   // std::cout << "velocity" << glm::to_string(velocity_) << std::endl;
   position_ = position_ + (velocity_ * (float)delta_time);
+  if (std::abs(position_.x) > 1.9) {
+    velocity_.x = -velocity_.x * 0.2;
+  }
+  if (std::abs(position_.y) > 1.9) {
+    velocity_.y = -velocity_.y * 0.2;
+  }
+  if (std::abs(position_.z) > 1.9) {
+    velocity_.z = -velocity_.z * 0.2;
+  }
   mesh_node_->GetTransform().SetPosition(position_);
 
   glm::quat rot = glm::quat(glm::vec3(0, -3.14/2.f, 0)) * glm::quatLookAt(glm::normalize(velocity_), glm::vec3(0, 1, 0));
@@ -85,7 +93,7 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 0.2f;
+  float desiredseparation = 0.3f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
