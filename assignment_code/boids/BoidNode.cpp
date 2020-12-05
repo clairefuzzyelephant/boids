@@ -51,14 +51,20 @@ void BoidNode::UpdateBoids(double delta_time) {
   }
   // std::cout << "velocity" << glm::to_string(velocity_) << std::endl;
   position_ = position_ + (velocity_ * (float)delta_time);
-  if (std::abs(position_.x) > 1.9) {
-    velocity_.x = -velocity_.x * 0.2;
+  if (std::abs(position_.x) > 1.8) {
+    velocity_.x = -velocity_.x * 0.6;
   }
-  if (std::abs(position_.y) > 1.9) {
-    velocity_.y = -velocity_.y * 0.2;
+  if (std::abs(position_.y) > 1.8) {
+    velocity_.y = -velocity_.y * 0.6;
+    if (position_.y > 1.8) {
+      position_.y = 1.8;
+    }
+    else if (position_.y < -1.8) {
+      position_.y = -1.8;
+    }
   }
-  if (std::abs(position_.z) > 1.9) {
-    velocity_.z = -velocity_.z * 0.2;
+  if (std::abs(position_.z) > 1.8) {
+    velocity_.z = -velocity_.z * 0.6;
   }
   mesh_node_->GetTransform().SetPosition(position_);
 
