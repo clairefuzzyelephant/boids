@@ -11,13 +11,14 @@
 namespace GLOO {
 class BoidNode : public SceneNode {
  public:
-  BoidNode(const std::string& filename, const glm::vec3 position);
+  BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator);
   void UpdateBoids(double delta_time);
   void Run(const std::vector<BoidNode*>& boids, double delta_time);
   
   glm::vec3 position_;
   glm::vec3 velocity_;
   glm::vec3 acceleration_;
+  bool is_predator_;
 
  private:
   void LoadMeshFile(const std::string& filename);
@@ -29,7 +30,6 @@ class BoidNode : public SceneNode {
   glm::vec3 Cohesion(const std::vector<BoidNode*>& boids);
   glm::vec3 Avoidance();
   glm::vec3 seek(const glm::vec3 v);
-  // void borders();
   
   std::shared_ptr<ShaderProgram> shader_;
   std::shared_ptr<VertexObject> mesh_;

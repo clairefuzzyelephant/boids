@@ -10,7 +10,7 @@
 #include "glm/gtx/string_cast.hpp"
 
 namespace GLOO {
-BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : SceneNode() {
+BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator) : SceneNode() {
   LoadMeshFile(filename);
   shader_ = std::make_shared<PhongShader>();
   auto offset = glm::vec3(-0.1, -0.03, -0.17);
@@ -21,6 +21,9 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   inner_node->CreateComponent<RenderingComponent>(mesh_);
   auto mat = inner_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
   mat.GetMaterial().SetDiffuseColor(glm::vec3(245.f, 233.f, 154.f)/255.f);
+  if (is_predator) {
+    mat.GetMaterial().SetDiffuseColor(glm::vec3(252.f, 0.f, 0.f)/255.f);
+  }
   // Inner node necessary to fix .obj being slightly off center. Offset here fixes.
   inner_node->GetTransform().SetPosition(offset/6.25f);
   // If changing scale, may need to change offset proportionally
@@ -37,6 +40,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   
   max_speed_ = 5.f;
   max_force_ = 0.1f;
+  is_predator_ = is_predator;
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
@@ -78,10 +82,10 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
   glm::vec3 cohesion = Cohesion(boids);
   glm::vec3 avoidance = Avoidance();
   
-  AddForce(separation * (float)delta_time * 100.f);
+  AddForce(separation * (float)delta_time * 300.f);
   AddForce(alignment * (float)delta_time * 100.f);
   AddForce(cohesion * (float)delta_time * 300.f);
-  AddForce(avoidance * (float)delta_time * 100.f);
+  AddForce(avoidance * (float)delta_time * 200.f);
 }
 
 void BoidNode::AddForce(glm::vec3 force) {
@@ -93,23 +97,49 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 0.3f;
+  float desiredseparation = 0.2f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
+  glm::vec3 predator_force(0.f, 0.f, 0.f);
   // For every boid in the system, check if it's too close
   for (uint i = 0; i < boids.size(); i++) {
       // Calculate distance from current boid to boid we're looking at
       float d = glm::distance(position_, boids[i]->position_);
       // If this is a fellow boid and it's too close, move away from it
-      if ((d > 0) && (d < desiredseparation)) {
-          glm::vec3 diff = position_ -  boids[i]->position_;
-          if (glm::length(diff) > 0) {
-            diff = glm::normalize(diff);
-          }
-          diff = diff/d;
-          steer = steer + diff;
-          count++;
+      if ((d > 0) && (d < desiredseparation) && !is_predator_ && !boids[i]->is_predator_) {
+        glm::vec3 diff = position_ -  boids[i]->position_;
+        if (glm::length(diff) > 0) {
+          diff = glm::normalize(diff);
+        }
+        diff = diff/d;
+        steer = steer + diff;
+        count++;
       }
+      //both predators
+      else if ((d > 0) && (d < desiredseparation) && is_predator_ && boids[i]->is_predator_) {
+        // std::cout << "both predators" << std::endl;
+        glm::vec3 diff = position_ -  boids[i]->position_;
+        if (glm::length(diff) > 0) {
+          diff = glm::normalize(diff);
+        }
+        diff = diff/d;
+        diff = diff * 0.5f; //decrease distance
+        steer = steer + diff;
+        count++;
+      }
+      //running from predator
+      else if ((d > 0) && (d < 2.f) && !is_predator_ && boids[i]->is_predator_) {
+        // std::cout << "predator alert!!" << std::endl;
+        glm::vec3 diff = position_ -  boids[i]->position_;
+        if (glm::length(diff) > 0) {
+          diff = glm::normalize(diff);
+        }
+        diff = diff/d;
+        diff = diff * 800.f; //increase distance
+        // std::cout << glm::to_string(diff) << std::endl;
+        predator_force = predator_force + diff;
+      }
+      
   }
   // Adds average difference of location to acceleration
   if (count > 0)
@@ -124,6 +154,7 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
       if (steer_mag > max_force_) {
         steer = steer/steer_mag;
       }
+      steer = steer + predator_force;
   }
   return steer;
 }
@@ -135,11 +166,13 @@ glm::vec3 BoidNode::Alignment(const std::vector<BoidNode*>& boids)
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
+    if (!boids[i]->is_predator_) {
       float d = glm::distance(position_, boids[i]->position_);
       if ((d > 0) && (d < neighbordist)) { // 0 < d < 50
           sum = sum + boids[i]->velocity_;
           count++;
       }
+    }
   }
   // If there are boids close enough for alignment...
   if (count > 0) {
@@ -169,15 +202,22 @@ glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
   glm::vec3 sum(0.f, 0.f, 0.f);
   int count = 0;
   for (uint i = 0; i < boids.size(); i++) {
-    float d = glm::distance(position_, boids[i]->position_);
-    if ((d > 0) && (d < neighbordist)) {
-        sum = sum + boids[i]->position_;
-        count++;
+    if (!boids[i]->is_predator_) {
+      float d = glm::distance(position_, boids[i]->position_);
+      if ((d > 0) && (d < neighbordist)) {
+          sum = sum + boids[i]->position_;
+          count++;
+      }
     }
   }
   if (count > 0) {
     sum = sum / float(count);
-    return seek(sum);
+    if (is_predator_) {
+      return seek(sum) * 0.75f;
+    }
+    else {
+      return seek(sum);
+    }
   } else {
     return glm::vec3(0);
   }

@@ -10,11 +10,13 @@
 #include "gloo/InputManager.hpp"
 #include "gloo/cameras/ArcBallCameraNode.hpp"
 
+#include "glm/gtx/string_cast.hpp"
+
 namespace GLOO {
 
 Flock::Flock() {
   for (int i = 0; i < 25; i++) {
-    auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f));
+    auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f), false);
     addBoid(boid.get());
     AddChild(std::move(boid));
   }
@@ -70,7 +72,17 @@ void Flock::Update(double delta_time) {
       cam.TogglePOV();
     }
     prev_released = false;
-  } else {
+  } else if (InputManager::GetInstance().IsKeyPressed('P')) {
+    if (prev_released) {
+      glm::vec3 pos = glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f);
+      auto boid = make_unique<BoidNode>("pierog.obj", pos, true);
+      addBoid(boid.get());
+      AddChild(std::move(boid));
+      std::cout << "added predator at " << glm::to_string(pos) << std::endl;
+    }
+    prev_released = false;
+  } else
+  {
     prev_released = true;
   }
 
