@@ -191,6 +191,6 @@ void BoidApp::AddBorders(SceneNode& root) {
   mat = back_wall_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
   mat.GetMaterial().SetDiffuseColor(back_color);
   root.AddChild(std::move(back_wall_node));
-
 }
+
 } // namespace GLOO

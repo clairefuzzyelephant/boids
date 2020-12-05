@@ -21,6 +21,11 @@ ArcBallCameraNode::ArcBallCameraNode(float fov, float aspect, float distance)
   start_position_ = GetTransform().GetPosition();
   start_rotation_ = GetTransform().GetRotation();
   start_distance_ = distance;
+  pov_ = false;
+}
+
+void ArcBallCameraNode::TogglePOV() {
+  pov_ = !pov_;
 }
 
 void ArcBallCameraNode::Update(double delta_time) {
@@ -63,6 +68,10 @@ void ArcBallCameraNode::Update(double delta_time) {
       glm::vec3(0, 0, distance_), glm::vec3(0), glm::vec3(0, 1.f, 0)));
   *V *= glm::toMat4(GetTransform().GetRotation()) *
         glm::translate(glm::mat4(1.f), GetTransform().GetPosition());
+  if (pov_) {
+    V = make_unique<glm::mat4>(glm::lookAt(
+        GetTransform().GetPosition(), GetTransform().GetPosition() + direction_, glm::vec3(0, 1.f, 0)));
+  }
   GetComponentPtr<CameraComponent>()->SetViewMatrix(std::move(V));
 }
 

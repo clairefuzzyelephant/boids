@@ -12,6 +12,10 @@ class ArcBallCameraNode : public SceneNode {
                     float aspect = 0.75f,
                     float distance = 2.f);
   void Update(double delta_time) override;
+  void TogglePOV();
+  void SetDirection(glm::vec3 dir) {
+    direction_ = dir;
+  }
 
  private:
   void UpdateViewport();
@@ -26,6 +30,8 @@ class ArcBallCameraNode : public SceneNode {
   glm::quat start_rotation_;
   float start_distance_;
   glm::dvec2 mouse_start_click_;
+  bool pov_;
+  glm::vec3 direction_;
 };
 }  // namespace GLOO
 

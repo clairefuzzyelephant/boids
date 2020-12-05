@@ -23,6 +23,9 @@ public:
   void Update(double delta_time) override;
   
   std::vector<BoidNode*> flock;
+private:
+  glm::vec3 prev_camera_pos_;
+  glm::quat prev_camera_rot_;
 };
 
 }
