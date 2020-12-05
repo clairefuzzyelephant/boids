@@ -7,6 +7,10 @@
 #include "gloo/lights/DirectionalLight.hpp"
 #include "gloo/components/LightComponent.hpp"
 #include "gloo/debug/AxisNode.hpp"
+#include "gloo/shaders/SimpleShader.hpp"
+#include "gloo/components/MaterialComponent.hpp"
+#include "gloo/components/RenderingComponent.hpp"
+#include "gloo/components/ShadingComponent.hpp"
 
 #include "glm/gtx/string_cast.hpp"
 
@@ -36,15 +40,72 @@ void BoidApp::SetupScene() {
   auto sun_light_node = make_unique<SceneNode>();
   sun_light_node->CreateComponent<LightComponent>(sun_light);
   root.AddChild(std::move(sun_light_node));
-  
+
+  AddBorders(root);
+
   flock_ = make_unique<Flock>();
   
-  srand(3);
-  for (int i = 0; i < 50; i++) {
-    auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f));
-    flock_->addBoid(boid.get());
-    root.AddChild(std::move(boid));
-  }
   root.AddChild(std::move(flock_));
+}
+
+void BoidApp::AddBorders(SceneNode& root) {
+  auto shader = std::make_shared<SimpleShader>();
+  auto color = glm::vec3(50, 50, 50)/255.f;
+
+  auto floor = make_unique<VertexObject>();
+  float fw = 10; // floor width
+  auto positions = make_unique<PositionArray>();
+  positions->push_back(glm::vec3(fw, -2, fw));
+  positions->push_back(glm::vec3(-fw, -2, -fw));
+  positions->push_back(glm::vec3(fw, -2, -fw));
+  positions->push_back(glm::vec3(-fw, -2, fw));
+  floor->UpdatePositions(std::move(positions));
+  auto indices = make_unique<IndexArray>();
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(2);
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(3);
+  floor->UpdateIndices(std::move(indices));
+  auto normals = make_unique<NormalArray>();
+  normals->push_back(glm::vec3(0, 1, 0));
+  normals->push_back(glm::vec3(0, 1, 0));
+  floor->UpdateNormals(std::move(normals));
+
+  auto floor_node = make_unique<SceneNode>();
+  floor_node->CreateComponent<ShadingComponent>(shader);
+  floor_node->CreateComponent<RenderingComponent>(std::move(floor));
+  auto mat = floor_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+  mat.GetMaterial().SetDiffuseColor(color);
+  root.AddChild(std::move(floor_node));
+  
+  auto ceiling = make_unique<VertexObject>();
+  positions = make_unique<PositionArray>();
+  positions->push_back(glm::vec3(fw, 4, fw));
+  positions->push_back(glm::vec3(-fw, 4, -fw));
+  positions->push_back(glm::vec3(fw, 4, -fw));
+  positions->push_back(glm::vec3(-fw, 4, fw));
+  ceiling->UpdatePositions(std::move(positions));
+  indices = make_unique<IndexArray>();
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(2);
+  indices->push_back(0);
+  indices->push_back(1);
+  indices->push_back(3);
+  ceiling->UpdateIndices(std::move(indices));
+  normals = make_unique<NormalArray>();
+  normals->push_back(glm::vec3(0, 1, 0));
+  normals->push_back(glm::vec3(0, 1, 0));
+  ceiling->UpdateNormals(std::move(normals));
+
+  auto ceiling_node = make_unique<SceneNode>();
+  ceiling_node->CreateComponent<ShadingComponent>(shader);
+  ceiling_node->CreateComponent<RenderingComponent>(std::move(ceiling));
+  mat = ceiling_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+  mat.GetMaterial().SetDiffuseColor(color);
+  root.AddChild(std::move(ceiling_node));
+
 }
 } // namespace GLOO

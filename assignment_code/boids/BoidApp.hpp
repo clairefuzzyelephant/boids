@@ -19,6 +19,7 @@ class BoidApp : public Application {
 //   void DrawGUI() override;
 
  private:
+  void AddBorders(SceneNode& root);
   BoidNode* boid_node_ptr_;
   std::unique_ptr<Flock> flock_;
 };

@@ -27,6 +27,7 @@ class BoidNode : public SceneNode {
   glm::vec3 Separation(const std::vector<BoidNode*>& boids);
   glm::vec3 Alignment(const std::vector<BoidNode*>& boids);
   glm::vec3 Cohesion(const std::vector<BoidNode*>& boids);
+  glm::vec3 Avoidance();
   glm::vec3 seek(const glm::vec3 v);
   
   std::shared_ptr<ShaderProgram> shader_;

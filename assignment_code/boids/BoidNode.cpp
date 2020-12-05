@@ -22,9 +22,9 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   auto mat = inner_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
   mat.GetMaterial().SetDiffuseColor(glm::vec3(197, 172, 112)/255.f);
   // Inner node necessary to fix .obj being slightly off center. Offset here fixes.
-  inner_node->GetTransform().SetPosition(offset/5.f);
+  inner_node->GetTransform().SetPosition(offset/2.5f);
   // If changing scale, may need to change offset proportionally
-  inner_node->GetTransform().SetScale(glm::vec3(0.001));
+  inner_node->GetTransform().SetScale(glm::vec3(0.002));
 
   mesh_node->AddChild(std::move(inner_node));
   mesh_node_ = mesh_node.get();
@@ -35,8 +35,8 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position) : Scen
   velocity_ = glm::vec3(0);
   acceleration_ = glm::vec3(0);
   
-  max_speed_ = 1.f;
-  max_force_ = 0.1f;
+  max_speed_ = 10.f;
+  max_force_ = .1f;
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
@@ -62,11 +62,13 @@ void BoidNode::Run(const std::vector<BoidNode*>& boids, double delta_time)
 void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
   glm::vec3 separation = Separation(boids);
   glm::vec3 alignment = Alignment(boids);
-  glm::vec3 cohesion = Cohesion(boids) * 2.f;
+  glm::vec3 cohesion = Cohesion(boids);
+  glm::vec3 avoidance = Avoidance();
   
   AddForce(separation * (float)delta_time * 100.f);
   AddForce(alignment * (float)delta_time * 100.f);
-  AddForce(cohesion * (float)delta_time * 100.f);
+  AddForce(cohesion * (float)delta_time * 200.f);
+  AddForce(avoidance * (float)delta_time * 100.f);
 }
 
 void BoidNode::AddForce(glm::vec3 force) {
@@ -78,7 +80,7 @@ void BoidNode::AddForce(glm::vec3 force) {
 glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
 {
   // Distance of field of vision for separation between boids
-  float desiredseparation = 0.3f;
+  float desiredseparation = 0.2f;
   glm::vec3 steer(0.f, 0.f, 0.f);
   int count = 0;
   // For every boid in the system, check if it's too close
@@ -160,7 +162,21 @@ glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
     sum = sum / float(count);
     return seek(sum);
   } else {
-    return glm::vec3(0.f, 0.f, 0.f);
+    return glm::vec3(0);
+  }
+}
+
+glm::vec3 BoidNode::Avoidance()
+{
+  float repulsion = 0.1;
+  float floor_y = -2;
+  float ceiling_y = 4;
+  glm::vec3 force = glm::vec3(0);
+  if (position_.y < floor_y + 1) {
+    return force += glm::vec3(0, -position_.y/(position_.y-floor_y), 0);
+  }
+  if (position_.y > ceiling_y - 1) {
+    return force += glm::vec3(0, position_.y/(position_.y-ceiling_y), 0);
   }
 }
 
