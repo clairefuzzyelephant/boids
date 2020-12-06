@@ -25,6 +25,11 @@ class BoidApp : public Application {
   float separation_force_slider_ = 5;
   float alignment_force_slider_ = 5;
   float cohesion_force_slider_ = 5;
+
+  bool placing = false;
+  float x = 0.f;
+  float y = 0.f;
+  float z = 0.f;
 };
 }  // namespace GLOO
 

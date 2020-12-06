@@ -78,11 +78,27 @@ void BoidApp::DrawGUI() {
   ImGui::PushID(4);
   ImGui::SliderFloat("speed", &predator_speed_slider_, 0.8, 1);
   ImGui::PopID();
+
+  ImGui::Text("Add Attractive Object");
+  ImGui::PushID(5);
+  ImGui::Checkbox("enabled", &placing);
+  ImGui::PushID(6);
+  ImGui::SliderFloat("x", &x, -3, 3);
+  ImGui::PopID();
+  ImGui::PushID(7);
+  ImGui::SliderFloat("y", &y, -3, 3);
+  ImGui::PopID();
+  ImGui::PushID(8);
+  ImGui::SliderFloat("z", &z, -3, 3);
+  ImGui::PopID();
   ImGui::End();
 
   for (auto& boid : flock_->flock) {
     boid->SetForceCoefficients(wall_force_slider_, predator_speed_slider_, separation_force_slider_, alignment_force_slider_, cohesion_force_slider_);
   }
+
+  flock_->setObjectPosition(glm::vec3(x, y, z));
+  flock_->toggleObjectPositionView(placing);
 }
 
 void BoidApp::AddBorders(SceneNode& root) {

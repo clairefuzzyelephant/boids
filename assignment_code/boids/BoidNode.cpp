@@ -20,15 +20,19 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const 
   inner_node->CreateComponent<ShadingComponent>(shader_);
   inner_node->CreateComponent<RenderingComponent>(mesh_);
   auto mat = inner_node->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
-  mat.GetMaterial().SetDiffuseColor(glm::vec3(245.f, 233.f, 154.f)/255.f);
-  if (is_predator) {
-    mat.GetMaterial().SetDiffuseColor(glm::vec3(252.f, 0.f, 0.f)/255.f);
+  if (!is_predator) {
+    mat.GetMaterial().SetDiffuseColor(glm::vec3(245.f, 233.f, 154.f)/255.f);
+    // Inner node necessary to fix .obj being slightly off center. Offset here fixes.
+    inner_node->GetTransform().SetPosition(offset/6.25f);
+    // If changing scale, may need to change offset proportionally
+    inner_node->GetTransform().SetScale(glm::vec3(0.005));
   }
-  // Inner node necessary to fix .obj being slightly off center. Offset here fixes.
-  inner_node->GetTransform().SetPosition(offset/6.25f);
-  // If changing scale, may need to change offset proportionally
-  inner_node->GetTransform().SetScale(glm::vec3(0.005));
-
+  else {
+    mat.GetMaterial().SetDiffuseColor(glm::vec3(50.f, 50.f, 50.f)/255.f);
+    inner_node->GetTransform().SetScale(glm::vec3(0.003));
+    glm::quat rotation = glm::quat(glm::vec3(0, 180, 0));
+    inner_node->GetTransform().SetRotation(rotation);
+  }
   mesh_node->AddChild(std::move(inner_node));
   mesh_node_ = mesh_node.get();
   AddChild(std::move(mesh_node));
