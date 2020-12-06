@@ -14,6 +14,14 @@ class BoidNode : public SceneNode {
   BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator);
   void UpdateBoids(double delta_time);
   void Run(const std::vector<BoidNode*>& boids, double delta_time);
+  // sets values from sliders
+  void SetForceCoefficients(float wall_force, float predator_speed, float separation_force, float alignment_force, float cohesion_force) {
+    wall_force_ = wall_force;
+    predator_speed_ = predator_speed;
+    separation_coeff_ = separation_force;
+    alignment_coeff_ = alignment_force;
+    cohesion_coeff_ = cohesion_force;
+  }
   
   glm::vec3 position_;
   glm::vec3 velocity_;
@@ -30,6 +38,7 @@ class BoidNode : public SceneNode {
   glm::vec3 Cohesion(const std::vector<BoidNode*>& boids);
   glm::vec3 Avoidance();
   glm::vec3 seek(const glm::vec3 v);
+  float ForceCurve(float x, float border);
   
   std::shared_ptr<ShaderProgram> shader_;
   std::shared_ptr<VertexObject> mesh_;
@@ -38,6 +47,12 @@ class BoidNode : public SceneNode {
   PositionArray mesh_positions_;
   float max_speed_;
   float max_force_;
+
+  float wall_force_;
+  float predator_speed_;
+  float separation_coeff_;
+  float alignment_coeff_;
+  float cohesion_coeff_;
 };
 }  // namespace GLOO
 

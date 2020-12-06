@@ -8,6 +8,7 @@
 #include "gloo/components/LightComponent.hpp"
 #include "gloo/debug/AxisNode.hpp"
 #include "gloo/shaders/SimpleShader.hpp"
+#include "gloo/shaders/PhongShader.hpp"
 #include "gloo/components/MaterialComponent.hpp"
 #include "gloo/components/RenderingComponent.hpp"
 #include "gloo/components/ShadingComponent.hpp"
@@ -41,24 +42,61 @@ void BoidApp::SetupScene() {
   sun_light_node->CreateComponent<LightComponent>(sun_light);
   root.AddChild(std::move(sun_light_node));
 
+  auto camera_light = std::make_shared<DirectionalLight>();
+  camera_light->SetDiffuseColor(glm::vec3(0.6f, 0.6f, 0.6f));
+  camera_light->SetSpecularColor(glm::vec3(0.6f, 0.6f, 0.6f));
+  camera_light->SetDirection(glm::vec3(0, 0, -1.0f));
+  auto camera_light_node = make_unique<SceneNode>();
+  camera_light_node->CreateComponent<LightComponent>(camera_light);
+  root.AddChild(std::move(camera_light_node));
+
   AddBorders(root);
 
-  flock_ = make_unique<Flock>();
+  auto flock = make_unique<Flock>();
+  flock_ = flock.get();
   
-  root.AddChild(std::move(flock_));
+  root.AddChild(std::move(flock));
+}
+
+void BoidApp::DrawGUI() {
+  ImGui::Begin("Control Panel");
+  ImGui::Text("Forces");
+  ImGui::PushID(0);
+  ImGui::SliderFloat("wall", &wall_force_slider_, 0, 100);
+  ImGui::PopID();
+  ImGui::PushID(1);
+  ImGui::SliderFloat("separation", &separation_force_slider_, 0, 10);
+  ImGui::PopID();
+  ImGui::PushID(2);
+  ImGui::SliderFloat("alignment", &alignment_force_slider_, 0, 10);
+  ImGui::PopID();
+  ImGui::PushID(3);
+  ImGui::SliderFloat("cohesion", &cohesion_force_slider_, 0, 10);
+  ImGui::PopID();
+
+  ImGui::Text("Predator");
+  ImGui::PushID(4);
+  ImGui::SliderFloat("speed", &predator_speed_slider_, 0.8, 1);
+  ImGui::PopID();
+  ImGui::End();
+
+  for (auto& boid : flock_->flock) {
+    boid->SetForceCoefficients(wall_force_slider_, predator_speed_slider_, separation_force_slider_, alignment_force_slider_, cohesion_force_slider_);
+  }
 }
 
 void BoidApp::AddBorders(SceneNode& root) {
-  auto shader = std::make_shared<SimpleShader>();
+  auto shader = std::make_shared<PhongShader>();
   auto top_bottom_color = glm::vec3(255, 255, 255)/255.f;
 
   auto floor = make_unique<VertexObject>();
-  float fw = 4; // floor width
+  float fw = 5; // floor width
+  float h = 3;  // height
   auto positions = make_unique<PositionArray>();
-  positions->push_back(glm::vec3(fw, -2, fw));
-  positions->push_back(glm::vec3(-fw, -2, -fw));
-  positions->push_back(glm::vec3(fw, -2, -fw));
-  positions->push_back(glm::vec3(-fw, -2, fw));
+  positions->push_back(glm::vec3(fw, -h, fw));
+  positions->push_back(glm::vec3(-fw, -h, -fw));
+  positions->push_back(glm::vec3(fw, -h, -fw));
+  positions->push_back(glm::vec3(-fw, -h, fw));
   floor->UpdatePositions(std::move(positions));
   auto indices = make_unique<IndexArray>();
   indices->push_back(0);
@@ -82,10 +120,10 @@ void BoidApp::AddBorders(SceneNode& root) {
   
   auto ceiling = make_unique<VertexObject>();
   positions = make_unique<PositionArray>();
-  positions->push_back(glm::vec3(fw, 2, fw));
-  positions->push_back(glm::vec3(-fw, 2, -fw));
-  positions->push_back(glm::vec3(fw, 2, -fw));
-  positions->push_back(glm::vec3(-fw, 2, fw));
+  positions->push_back(glm::vec3(fw, h, fw));
+  positions->push_back(glm::vec3(-fw, h, -fw));
+  positions->push_back(glm::vec3(fw, h, -fw));
+  positions->push_back(glm::vec3(-fw, h, fw));
   ceiling->UpdatePositions(std::move(positions));
   indices = make_unique<IndexArray>();
   indices->push_back(0);
@@ -96,8 +134,8 @@ void BoidApp::AddBorders(SceneNode& root) {
   indices->push_back(3);
   ceiling->UpdateIndices(std::move(indices));
   normals = make_unique<NormalArray>();
-  normals->push_back(glm::vec3(0, 1, 0));
-  normals->push_back(glm::vec3(0, 1, 0));
+  for (int i = 0; i < 6; i++)
+    normals->push_back(glm::vec3(0, 1, 0));
   ceiling->UpdateNormals(std::move(normals));
 
   auto ceiling_node = make_unique<SceneNode>();
@@ -111,10 +149,10 @@ void BoidApp::AddBorders(SceneNode& root) {
 
   auto right_wall = make_unique<VertexObject>();
   positions = make_unique<PositionArray>();
-  positions->push_back(glm::vec3(fw, 2, -fw));
-  positions->push_back(glm::vec3(fw, -2, fw));
-  positions->push_back(glm::vec3(fw, 2, fw));
-  positions->push_back(glm::vec3(fw, -2, -fw));
+  positions->push_back(glm::vec3(fw, h, -fw));
+  positions->push_back(glm::vec3(fw, -h, fw));
+  positions->push_back(glm::vec3(fw, h, fw));
+  positions->push_back(glm::vec3(fw, -h, -fw));
   right_wall->UpdatePositions(std::move(positions));
   indices = make_unique<IndexArray>();
   indices->push_back(0);
@@ -125,8 +163,8 @@ void BoidApp::AddBorders(SceneNode& root) {
   indices->push_back(3);
   right_wall->UpdateIndices(std::move(indices));
   normals = make_unique<NormalArray>();
-  normals->push_back(glm::vec3(1, 0, 0));
-  normals->push_back(glm::vec3(1, 0, 0));
+  for (int i = 0; i < 6; i++)
+    normals->push_back(glm::vec3(1, 0, 0));
   right_wall->UpdateNormals(std::move(normals));
 
   auto right_wall_node = make_unique<SceneNode>();
@@ -138,10 +176,10 @@ void BoidApp::AddBorders(SceneNode& root) {
 
   auto left_wall = make_unique<VertexObject>();
   positions = make_unique<PositionArray>();
-  positions->push_back(glm::vec3(-fw, 2, -fw));
-  positions->push_back(glm::vec3(-fw, -2, fw));
-  positions->push_back(glm::vec3(-fw, 2, fw));
-  positions->push_back(glm::vec3(-fw, -2, -fw));
+  positions->push_back(glm::vec3(-fw, h, -fw));
+  positions->push_back(glm::vec3(-fw, -h, fw));
+  positions->push_back(glm::vec3(-fw, h, fw));
+  positions->push_back(glm::vec3(-fw, -h, -fw));
   left_wall->UpdatePositions(std::move(positions));
   indices = make_unique<IndexArray>();
   indices->push_back(0);
@@ -152,8 +190,8 @@ void BoidApp::AddBorders(SceneNode& root) {
   indices->push_back(3);
   left_wall->UpdateIndices(std::move(indices));
   normals = make_unique<NormalArray>();
-  normals->push_back(glm::vec3(1, 0, 0));
-  normals->push_back(glm::vec3(1, 0, 0));
+  for (int i = 0; i < 6; i++)
+    normals->push_back(glm::vec3(1, 0, 0));
   left_wall->UpdateNormals(std::move(normals));
 
   auto left_wall_node = make_unique<SceneNode>();
@@ -167,10 +205,10 @@ void BoidApp::AddBorders(SceneNode& root) {
 
   auto back_wall = make_unique<VertexObject>();
   positions = make_unique<PositionArray>();
-  positions->push_back(glm::vec3(-fw, 2, -fw));
-  positions->push_back(glm::vec3(fw, -2, -fw));
-  positions->push_back(glm::vec3(fw, 2, -fw));
-  positions->push_back(glm::vec3(-fw, -2, -fw));
+  positions->push_back(glm::vec3(-fw, h, -fw));
+  positions->push_back(glm::vec3(fw, -h, -fw));
+  positions->push_back(glm::vec3(fw, h, -fw));
+  positions->push_back(glm::vec3(-fw, -h, -fw));
   back_wall->UpdatePositions(std::move(positions));
   indices = make_unique<IndexArray>();
   indices->push_back(0);
@@ -181,8 +219,8 @@ void BoidApp::AddBorders(SceneNode& root) {
   indices->push_back(3);
   back_wall->UpdateIndices(std::move(indices));
   normals = make_unique<NormalArray>();
-  normals->push_back(glm::vec3(1, 0, 0));
-  normals->push_back(glm::vec3(1, 0, 0));
+  for (int i = 0; i < 6; i++)
+    normals->push_back(glm::vec3(0, 0, 1));
   back_wall->UpdateNormals(std::move(normals));
 
   auto back_wall_node = make_unique<SceneNode>();

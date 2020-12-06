@@ -44,26 +44,32 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const 
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
-  acceleration_ = acceleration_ * 0.5f; //dampen
+  acceleration_ = acceleration_ * 0.5f; // dampen
   velocity_ = velocity_ + (acceleration_ * (float)delta_time);
+  if (is_predator_) {
+    velocity_ *= predator_speed_;
+  }
+
   if (glm::length(velocity_) > max_speed_) {
     velocity_ = glm::normalize(velocity_) * 4.f;
   }
   // std::cout << "velocity" << glm::to_string(velocity_) << std::endl;
   position_ = position_ + (velocity_ * (float)delta_time);
-  if (std::abs(position_.x) > 1.8) {
+  float sides = 4.8;
+  float height = 2.8;
+  if (std::abs(position_.x) > sides) {
     velocity_.x = -velocity_.x * 0.6;
   }
-  if (std::abs(position_.y) > 1.8) {
+  if (std::abs(position_.y) > height) {
     velocity_.y = -velocity_.y * 0.6;
-    if (position_.y > 1.8) {
-      position_.y = 1.8;
+    if (position_.y > height) {
+      position_.y = height;
     }
-    else if (position_.y < -1.8) {
-      position_.y = -1.8;
+    else if (position_.y < -height) {
+      position_.y = -height;
     }
   }
-  if (std::abs(position_.z) > 1.8) {
+  if (std::abs(position_.z) > sides) {
     velocity_.z = -velocity_.z * 0.6;
   }
   mesh_node_->GetTransform().SetPosition(position_);
@@ -88,9 +94,9 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
   glm::vec3 cohesion = Cohesion(boids);
   glm::vec3 avoidance = Avoidance();
   
-  AddForce(separation * (float)delta_time * 300.f);
-  AddForce(alignment * (float)delta_time * 100.f);
-  AddForce(cohesion * (float)delta_time * 300.f);
+  AddForce(separation * float(delta_time) * 60.f * separation_coeff_);
+  AddForce(alignment * float(delta_time) * 20.f * alignment_coeff_);
+  AddForce(cohesion * float(delta_time) * 60.f * cohesion_coeff_);
   AddForce(avoidance * (float)delta_time * 200.f);
 }
 
@@ -232,34 +238,33 @@ glm::vec3 BoidNode::Cohesion(const std::vector<BoidNode*>& boids)
 glm::vec3 BoidNode::Avoidance()
 {
   glm::vec3 force = glm::vec3(0);
+  float offset = 0.5; // offset from border that we apply force starting at
 
-  float floor_y = -2;
-  float ceiling_y = 2;
-  if (position_.y < floor_y + 1) {
-    force += glm::vec3(0, -position_.y/(position_.y-floor_y), 0);
-  }
-  if (position_.y > ceiling_y - 1) {
-    force += glm::vec3(0, position_.y/(position_.y-ceiling_y), 0);
-  }
+  // side walls
+  force += glm::vec3(ForceCurve(position_.x, -4+offset), 0, 0);
+  force += glm::vec3(ForceCurve(position_.x, 4-offset), 0, 0);
 
-  float right_x = 2;
-  float left_x = -2;
-  if (position_.x < left_x + 1) {
-    force += glm::vec3(-position_.x/(position_.x-left_x), 0, 0);
-  }
-  if (position_.x > right_x - 1) {
-    force += glm::vec3(position_.x/(position_.x-right_x), 0, 0);
-  }
+  // ceiling/floor
+  force += glm::vec3(0, ForceCurve(position_.y, -2+offset), 0);
+  force += glm::vec3(0, ForceCurve(position_.y, 2-offset), 0);
 
-  float close_z = 2;
-  float far_z = -2;
-  if (position_.z < far_z + 1) {
-    force += glm::vec3(0, 0, -position_.z/(position_.z-far_z));
-  }
-  if (position_.z > close_z - 1) {
-    force += glm::vec3(0, 0, position_.z/(position_.z-close_z));
-  }
+  // front/back
+  force += glm::vec3(0, 0, ForceCurve(position_.z, -4+offset));
+  force += glm::vec3(0, 0, ForceCurve(position_.z, 4-offset));
+
   return force;
+}
+
+float BoidNode::ForceCurve(float x, float border) {
+  float coeff = wall_force_;
+  if (border > 0) {
+    float f = exp(x-border) - 1;
+    if (f > 0) return -f*coeff;
+  } else {
+    float f = exp(-(x-border)) - 1;
+    if (f > 0) return f*coeff;
+  }
+  return 0;
 }
 
 

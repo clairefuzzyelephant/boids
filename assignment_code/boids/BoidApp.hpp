@@ -14,14 +14,17 @@ class BoidApp : public Application {
   void SetupScene() override;
   void Update(double delta_time);
 
-// TODO: GUI for adjusting parameters?
-//  protected:
-//   void DrawGUI() override;
+ protected:
+  void DrawGUI() override;
 
  private:
   void AddBorders(SceneNode& root);
-  BoidNode* boid_node_ptr_;
-  std::unique_ptr<Flock> flock_;
+  Flock* flock_;
+  float wall_force_slider_ = 35;
+  float predator_speed_slider_ = 0.98;
+  float separation_force_slider_ = 5;
+  float alignment_force_slider_ = 5;
+  float cohesion_force_slider_ = 5;
 };
 }  // namespace GLOO
 
