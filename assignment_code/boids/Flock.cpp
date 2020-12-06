@@ -34,6 +34,9 @@ Flock::Flock() {
   sphere->SetActive(false);
   AddChild(std::move(sphere));
 
+  attractive_object_ = new SceneNode();
+  is_attracting_ = false;
+
   for (int i = 0; i < 25; i++) {
     auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f), false);
     addBoid(boid.get());
@@ -56,8 +59,9 @@ void Flock::addBoid(BoidNode* b)
   flock.push_back(b);
 }
 
-void Flock::addAttractiveObject(SceneNode* s) {
-  attractive_objects.push_back(s);
+void Flock::setAttractiveObject(SceneNode* s) {
+  attractive_object_ = s;
+  is_attracting_ = true;
 }
 
 void Flock::setObjectPosition(glm::vec3 pos) {
@@ -77,7 +81,7 @@ void Flock::Update(double delta_time) {
   auto ave_pos = glm::vec3(0);
   auto ave_vel = glm::vec3(0);
   for (uint i = 0; i < flock.size(); i++) {
-    flock[i]->Run(flock, delta_time);
+    flock[i]->Run(flock, attractive_object_, is_attracting_, delta_time);
     ave_pos += flock[i]->position_;
     ave_vel += flock[i]->velocity_;
   }
@@ -123,7 +127,7 @@ void Flock::Update(double delta_time) {
       sphere->CreateComponent<RenderingComponent>(mesh);
       sphere->GetTransform().SetPosition(object_position_);
       sphere->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
-      addAttractiveObject(sphere.get());
+      setAttractiveObject(sphere.get());
       AddChild(std::move(sphere));
       std::cout << "added attractive object at " << glm::to_string(object_position_) << std::endl;
     }

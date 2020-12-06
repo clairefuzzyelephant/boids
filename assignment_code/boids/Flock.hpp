@@ -19,14 +19,15 @@ public:
   int getSize();
   BoidNode* getBoid(int i);
   void addBoid(BoidNode* b);
-  void addAttractiveObject(SceneNode* s);
+  void setAttractiveObject(SceneNode* s);
   void setObjectPosition(glm::vec3 pos);
   void toggleObjectPositionView(bool viewable);
   void flocking();
   void Update(double delta_time) override;
   
   std::vector<BoidNode*> flock;
-  std::vector<SceneNode*> attractive_objects;
+  SceneNode* attractive_object_;
+  bool is_attracting_;
 private:
   glm::vec3 prev_camera_pos_;
   glm::quat prev_camera_rot_;

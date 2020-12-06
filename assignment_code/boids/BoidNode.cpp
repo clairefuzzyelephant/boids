@@ -45,6 +45,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const 
   max_speed_ = 5.f;
   max_force_ = 0.1f;
   is_predator_ = is_predator;
+
 }
 
 void BoidNode::UpdateBoids(double delta_time) {
@@ -85,23 +86,28 @@ void BoidNode::UpdateBoids(double delta_time) {
   
 }
 
-void BoidNode::Run(const std::vector<BoidNode*>& boids, double delta_time)
+void BoidNode::Run(const std::vector<BoidNode*>& boids,  SceneNode* attractive_object, bool object_active, double delta_time)
 {
-    Flock(boids, delta_time);
+    Flock(boids, attractive_object, object_active, delta_time);
     UpdateBoids(delta_time);
     // std::cout << "position" << glm::to_string(position_) << std::endl;
 }
 
-void BoidNode::Flock(const std::vector<BoidNode*>& boids, double delta_time) {
+void BoidNode::Flock(const std::vector<BoidNode*>& boids, SceneNode* attractive_object, bool object_active, double delta_time) {
   glm::vec3 separation = Separation(boids);
   glm::vec3 alignment = Alignment(boids);
   glm::vec3 cohesion = Cohesion(boids);
   glm::vec3 avoidance = Avoidance();
+  glm::vec3 attraction = glm::vec3(0.f, 0.f, 0.f);
+  if (object_active) {
+    attraction = Attraction(boids, attractive_object);
+  }
   
   AddForce(separation * float(delta_time) * 60.f * separation_coeff_);
   AddForce(alignment * float(delta_time) * 20.f * alignment_coeff_);
   AddForce(cohesion * float(delta_time) * 60.f * cohesion_coeff_);
   AddForce(avoidance * (float)delta_time * 200.f);
+  AddForce(attraction * float(delta_time) * 300.f);
 }
 
 void BoidNode::AddForce(glm::vec3 force) {
@@ -257,6 +263,19 @@ glm::vec3 BoidNode::Avoidance()
   force += glm::vec3(0, 0, ForceCurve(position_.z, 4-offset));
 
   return force;
+}
+
+
+// Attraction
+// Pulls boids towards attractive object
+glm::vec3 BoidNode::Attraction(const std::vector<BoidNode*>& boids, const SceneNode* attractive_object)
+{
+  if (!is_predator_) {
+    return seek(attractive_object->GetTransform().GetPosition());
+  }
+  else {
+    return glm::vec3(0);
+  }
 }
 
 float BoidNode::ForceCurve(float x, float border) {

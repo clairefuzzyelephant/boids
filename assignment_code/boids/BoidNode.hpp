@@ -13,7 +13,7 @@ class BoidNode : public SceneNode {
  public:
   BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator);
   void UpdateBoids(double delta_time);
-  void Run(const std::vector<BoidNode*>& boids, double delta_time);
+  void Run(const std::vector<BoidNode*>& boids,  SceneNode* attractive_object, bool object_active, double delta_time);
   // sets values from sliders
   void SetForceCoefficients(float wall_force, float predator_speed, float separation_force, float alignment_force, float cohesion_force) {
     wall_force_ = wall_force;
@@ -32,11 +32,12 @@ class BoidNode : public SceneNode {
   void LoadMeshFile(const std::string& filename);
   void AddForce(glm::vec3 force);
   
-  void Flock(const std::vector<BoidNode*>& boids, double delta_time);
+  void Flock(const std::vector<BoidNode*>& boids, SceneNode* attractive_object, bool object_active, double delta_time);
   glm::vec3 Separation(const std::vector<BoidNode*>& boids);
   glm::vec3 Alignment(const std::vector<BoidNode*>& boids);
   glm::vec3 Cohesion(const std::vector<BoidNode*>& boids);
   glm::vec3 Avoidance();
+  glm::vec3 Attraction(const std::vector<BoidNode*>& boids, const SceneNode* attractive_object);
   glm::vec3 seek(const glm::vec3 v);
   float ForceCurve(float x, float border);
   
