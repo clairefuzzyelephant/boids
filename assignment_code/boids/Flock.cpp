@@ -99,12 +99,14 @@ void Flock::checkAttractorExpired() {
 }
 
 void Flock::Update(double delta_time) {
+  static bool paused = false;
   checkAttractorExpired();
 
   auto ave_pos = glm::vec3(0);
   auto ave_vel = glm::vec3(0);
   for (uint i = 0; i < flock.size(); i++) {
-    flock[i]->Run(flock, attractive_object_, is_attracting_, delta_time);
+    if (!paused)
+      flock[i]->Run(flock, attractive_object_, is_attracting_, delta_time);
     ave_pos += flock[i]->position_;
     ave_vel += flock[i]->velocity_;
   }
@@ -134,7 +136,7 @@ void Flock::Update(double delta_time) {
   } else if (InputManager::GetInstance().IsKeyPressed('P')) {
     if (prev_released) {
       glm::vec3 pos = glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f);
-      auto predator = make_unique<BoidNode>("fork.obj", pos, true);
+      auto predator = make_unique<BoidNode>("fork_blender.obj", pos, true);
       addBoid(predator.get());
       AddChild(std::move(predator));
       std::cout << "added predator at " << glm::to_string(pos) << std::endl;
@@ -163,6 +165,11 @@ void Flock::Update(double delta_time) {
       std::cout << "added attractive object at " << glm::to_string(object_position_) << std::endl;
     }
     prev_released = false;
+  } else if (InputManager::GetInstance().IsKeyPressed(' ')) {
+    if (prev_released) {
+      paused = !paused;
+    }
+    prev_released = false;
   } else
   {
     prev_released = true;
@@ -172,7 +179,6 @@ void Flock::Update(double delta_time) {
     cam.GetTransform().SetPosition(ave_pos - 1.0f*glm::normalize(ave_vel));
     cam.SetDirection(glm::normalize(ave_vel));
   }
-
 }
 
 }

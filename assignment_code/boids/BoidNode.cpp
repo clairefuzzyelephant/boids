@@ -29,7 +29,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const 
   }
   else {
     mat.GetMaterial().SetDiffuseColor(glm::vec3(50.f, 50.f, 50.f)/255.f);
-    inner_node->GetTransform().SetScale(glm::vec3(0.003));
+    inner_node->GetTransform().SetScale(glm::vec3(0.05));
     glm::quat rotation = glm::quat(glm::vec3(0, 180, 0));
     inner_node->GetTransform().SetRotation(rotation);
   }
