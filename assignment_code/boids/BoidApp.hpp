@@ -25,6 +25,7 @@ class BoidApp : public Application {
   float separation_force_slider_ = 5;
   float alignment_force_slider_ = 5;
   float cohesion_force_slider_ = 5;
+  float attractor_force_slider_ = 5;
 
   bool placing = false;
   float x = 0.f;

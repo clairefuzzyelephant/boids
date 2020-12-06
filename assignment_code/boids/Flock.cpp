@@ -22,7 +22,6 @@
 namespace GLOO {
 
 Flock::Flock() {
-  object_position_ = glm::vec3(0.f, 0.f, 0.f);
   auto sphere = make_unique<SceneNode>();
   std::shared_ptr<PhongShader> shader = std::make_shared<PhongShader>();
   sphere->CreateComponent<ShadingComponent>(shader);
@@ -36,6 +35,8 @@ Flock::Flock() {
 
   attractive_object_ = new SceneNode();
   is_attracting_ = false;
+  object_position_ = glm::vec3(0.f, 0.f, 0.f);
+  object_placed_ = -1; // has not been placed
 
   for (int i = 0; i < 25; i++) {
     auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f), false);
@@ -77,7 +78,29 @@ void Flock::toggleObjectPositionView(bool viewable) {
 // itself. Which in turn applies all the rules to the flock.
 void Flock::flocking() {}
 
+void Flock::checkAttractorExpired() {
+  if (object_placed_ != -1 and is_attracting_) {
+    for (auto boid : flock) {
+      if (std::abs(boid->position_.x - object_position_.x) > 0.2f) {
+        continue;
+      }
+      if (std::abs(boid->position_.y - object_position_.y) > 0.2f) {
+        continue;
+      }
+      if (std::abs(boid->position_.z - object_position_.z) > 0.2f) {
+        continue;
+      }
+      //remove attractor object if 'collision'
+      GetChild(object_placed_).SetActive(false);
+      is_attracting_ = false;
+    }
+  }
+  
+}
+
 void Flock::Update(double delta_time) {
+  checkAttractorExpired();
+
   auto ave_pos = glm::vec3(0);
   auto ave_vel = glm::vec3(0);
   for (uint i = 0; i < flock.size(); i++) {
@@ -119,16 +142,24 @@ void Flock::Update(double delta_time) {
     prev_released = false;
   } else if (InputManager::GetInstance().IsKeyPressed('D')) {
     if (prev_released) {
-
-      auto sphere = make_unique<SceneNode>();
-      std::shared_ptr<PhongShader> shader = std::make_shared<PhongShader>();
-      sphere->CreateComponent<ShadingComponent>(shader);
-      std::shared_ptr<VertexObject> mesh = PrimitiveFactory::CreateSphere(0.05f, 25, 25);
-      sphere->CreateComponent<RenderingComponent>(mesh);
-      sphere->GetTransform().SetPosition(object_position_);
-      sphere->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
-      setAttractiveObject(sphere.get());
-      AddChild(std::move(sphere));
+      if (object_placed_ == -1) {
+        auto sphere = make_unique<SceneNode>();
+        std::shared_ptr<PhongShader> shader = std::make_shared<PhongShader>();
+        sphere->CreateComponent<ShadingComponent>(shader);
+        std::shared_ptr<VertexObject> mesh = PrimitiveFactory::CreateSphere(0.05f, 25, 25);
+        sphere->CreateComponent<RenderingComponent>(mesh);
+        sphere->GetTransform().SetPosition(object_position_);
+        sphere->CreateComponent<MaterialComponent>(std::make_shared<Material>(Material::GetDefault()));
+        setAttractiveObject(sphere.get());
+        AddChild(std::move(sphere));
+        object_placed_ = GetChildrenCount() - 1;
+      }
+      else {
+        GetChild(object_placed_).GetTransform().SetPosition(object_position_);
+        GetChild(object_placed_).SetActive(true);
+        is_attracting_ = true;
+      }
+      
       std::cout << "added attractive object at " << glm::to_string(object_position_) << std::endl;
     }
     prev_released = false;

@@ -107,7 +107,7 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids, SceneNode* attractive_
   AddForce(alignment * float(delta_time) * 20.f * alignment_coeff_);
   AddForce(cohesion * float(delta_time) * 60.f * cohesion_coeff_);
   AddForce(avoidance * (float)delta_time * 200.f);
-  AddForce(attraction * float(delta_time) * 300.f);
+  AddForce(attraction * float(delta_time) * 60.f * attractor_coeff_);
 }
 
 void BoidNode::AddForce(glm::vec3 force) {

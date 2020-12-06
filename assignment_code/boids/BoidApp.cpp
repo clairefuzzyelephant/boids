@@ -81,20 +81,24 @@ void BoidApp::DrawGUI() {
 
   ImGui::Text("Add Attractive Object");
   ImGui::PushID(5);
-  ImGui::Checkbox("enabled", &placing);
+  ImGui::Checkbox("view enabled", &placing);
+  ImGui::PopID();
   ImGui::PushID(6);
-  ImGui::SliderFloat("x", &x, -3, 3);
+  ImGui::SliderFloat("force", &attractor_force_slider_, 0, 10);
   ImGui::PopID();
   ImGui::PushID(7);
-  ImGui::SliderFloat("y", &y, -3, 3);
+  ImGui::SliderFloat("x", &x, -2, 2);
   ImGui::PopID();
   ImGui::PushID(8);
-  ImGui::SliderFloat("z", &z, -3, 3);
+  ImGui::SliderFloat("y", &y, -2, 2);
+  ImGui::PopID();
+  ImGui::PushID(9);
+  ImGui::SliderFloat("z", &z, -4, 4);
   ImGui::PopID();
   ImGui::End();
 
   for (auto& boid : flock_->flock) {
-    boid->SetForceCoefficients(wall_force_slider_, predator_speed_slider_, separation_force_slider_, alignment_force_slider_, cohesion_force_slider_);
+    boid->SetForceCoefficients(wall_force_slider_, predator_speed_slider_, separation_force_slider_, alignment_force_slider_, cohesion_force_slider_, attractor_force_slider_);
   }
 
   flock_->setObjectPosition(glm::vec3(x, y, z));

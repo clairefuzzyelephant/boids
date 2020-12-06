@@ -24,6 +24,7 @@ public:
   void toggleObjectPositionView(bool viewable);
   void flocking();
   void Update(double delta_time) override;
+  void checkAttractorExpired();
   
   std::vector<BoidNode*> flock;
   SceneNode* attractive_object_;
@@ -33,6 +34,7 @@ private:
   glm::quat prev_camera_rot_;
 
   glm::vec3 object_position_;
+  int object_placed_; //index at which the attractor object is placed
 };
 
 }
