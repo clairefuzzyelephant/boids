@@ -11,7 +11,7 @@
 namespace GLOO {
 class BoidNode : public SceneNode {
  public:
-  BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator);
+  BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator, int boid_id);
   void UpdateBoid(double delta_time);
   void Run(const std::vector<BoidNode*>& boids,  SceneNode* attractive_object, bool object_active, double delta_time);
   // sets values from sliders
@@ -28,6 +28,7 @@ class BoidNode : public SceneNode {
   glm::vec3 velocity_;
   glm::vec3 acceleration_;
   bool is_predator_;
+  int id_;
 
  private:
   void LoadMeshFile(const std::string& filename);

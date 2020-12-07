@@ -39,7 +39,7 @@ Flock::Flock() {
   object_placed_ = -1; // has not been placed
 
   for (int i = 0; i < 25; i++) {
-    auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f), false);
+    auto boid = make_unique<BoidNode>("pierog.obj", glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f), false, i);
     addBoid(boid.get());
     AddChild(std::move(boid));
   }
@@ -136,7 +136,7 @@ void Flock::Update(double delta_time) {
   } else if (InputManager::GetInstance().IsKeyPressed('P')) {
     if (prev_released) {
       glm::vec3 pos = glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f);
-      auto predator = make_unique<BoidNode>("another_fork.obj", pos, true);
+      auto predator = make_unique<BoidNode>("another_fork.obj", pos, true, 0);
       addBoid(predator.get());
       AddChild(std::move(predator));
       std::cout << "added predator at " << glm::to_string(pos) << std::endl;

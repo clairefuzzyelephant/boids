@@ -10,10 +10,11 @@
 #include "glm/gtx/string_cast.hpp"
 
 namespace GLOO {
-BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator) : SceneNode() {
+BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator, int boid_id) : SceneNode() {
   LoadMeshFile(filename);
   shader_ = std::make_shared<PhongShader>();
   auto offset = glm::vec3(-0.1, -0.03, -0.17);
+  id_ = boid_id;
 
   auto mesh_node = make_unique<SceneNode>();
   auto inner_node = make_unique<SceneNode>();
@@ -130,15 +131,25 @@ glm::vec3 BoidNode::Separation(const std::vector<BoidNode*>& boids)
   glm::vec3 predator_force(0.f, 0.f, 0.f);
   // For every boid in the system, check if it's too close
   for (uint i = 0; i < boids.size(); i++) {
+      if (i == id_) {
+        continue;
+      }
       // Calculate distance from current boid to boid we're looking at
       float d = glm::distance(position_, boids[i]->position_);
       // If this is a fellow boid and it's too close, move away from it
-      if ((d > 0) && (d < desiredseparation) && !is_predator_ && !boids[i]->is_predator_) {
-        glm::vec3 diff = position_ -  boids[i]->position_;
-        if (glm::length(diff) > 0) {
+      if ((d >= 0) && (d < desiredseparation) && !is_predator_ && !boids[i]->is_predator_) {
+        glm::vec3 diff;
+        if (d == 0) {
+          diff = glm::vec3(rand()%3, rand()%3, rand()%3);
           diff = glm::normalize(diff);
         }
-        diff = diff/d;
+        else {
+          diff = position_ -  boids[i]->position_;
+          if (glm::length(diff) > 0) {
+            diff = glm::normalize(diff);
+          }
+          diff = diff/d;
+        }
         steer = steer + diff;
         count++;
       }
