@@ -62,7 +62,7 @@ void BoidApp::DrawGUI() {
   ImGui::Begin("Control Panel");
   ImGui::Text("Forces");
   ImGui::PushID(0);
-  ImGui::SliderFloat("wall", &wall_force_slider_, 0, 10);
+  ImGui::SliderFloat("wall", &wall_force_slider_, 0, 100);
   ImGui::PopID();
   ImGui::PushID(1);
   ImGui::SliderFloat("separation", &separation_force_slider_, 0, 10);
@@ -111,7 +111,7 @@ void BoidApp::AddBorders(SceneNode& root) {
 
   auto floor = make_unique<VertexObject>();
   float fw = 5; // floor width
-  float h = 5;  // height
+  float h = 3;  // height
   auto positions = make_unique<PositionArray>();
   positions->push_back(glm::vec3(fw, -h, fw));
   positions->push_back(glm::vec3(-fw, -h, -fw));

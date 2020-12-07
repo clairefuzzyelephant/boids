@@ -61,23 +61,23 @@ void BoidNode::UpdateBoid(double delta_time) {
   }
   // std::cout << "velocity" << glm::to_string(velocity_) << std::endl;
   position_ = position_ + (velocity_ * (float)delta_time);
-  // float sides = 4.8;
-  // float height = 4.8;
-  // if (std::abs(position_.x) > sides) {
-  //   velocity_.x = -velocity_.x * 0.6;
-  // }
-  // if (std::abs(position_.y) > height) {
-  //   velocity_.y = -velocity_.y * 0.6;
-  //   if (position_.y > height) {
-  //     position_.y = height;
-  //   }
-  //   else if (position_.y < -height) {
-  //     position_.y = -height;
-  //   }
-  // }
-  // if (std::abs(position_.z) > sides) {
-  //   velocity_.z = -velocity_.z * 0.6;
-  // }
+  float sides = 4.8;
+  float height = 2.8;
+  if (std::abs(position_.x) > sides) {
+    velocity_.x = -velocity_.x * 0.6;
+  }
+  if (std::abs(position_.y) > height) {
+    velocity_.y = -velocity_.y * 0.6;
+    if (position_.y > height) {
+      position_.y = height;
+    }
+    else if (position_.y < -height) {
+      position_.y = -height;
+    }
+  }
+  if (std::abs(position_.z) > sides) {
+    velocity_.z = -velocity_.z * 0.6;
+  }
   mesh_node_->GetTransform().SetPosition(position_);
 
   glm::quat rot;
@@ -112,7 +112,7 @@ void BoidNode::Flock(const std::vector<BoidNode*>& boids, SceneNode* attractive_
   AddForce(separation * float(delta_time) * 60.f * separation_coeff_);
   AddForce(alignment * float(delta_time) * 20.f * alignment_coeff_);
   AddForce(cohesion * float(delta_time) * 60.f * cohesion_coeff_);
-  AddForce(avoidance * (float)delta_time * 500.f * wall_force_);
+  AddForce(avoidance * (float)delta_time * 200.f);
   AddForce(attraction * float(delta_time) * 60.f * attractor_coeff_);
 }
 
@@ -277,16 +277,6 @@ glm::vec3 BoidNode::Avoidance()
   // front/back
   force += glm::vec3(0, 0, ForceCurve(position_.z, -4+offset));
   force += glm::vec3(0, 0, ForceCurve(position_.z, 4-offset));
-
-
-  // spherical force field
-  float border = 4;
-  if (glm::length(position_) > border) {
-    float mag = exp(glm::length(position_ - glm::normalize(position_)*border) - 1.f);
-    force = -mag * glm::normalize(position_);
-  } else {
-    force = glm::vec3(0);
-  }
 
   return force;
 }
