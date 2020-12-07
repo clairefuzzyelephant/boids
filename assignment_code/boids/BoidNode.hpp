@@ -12,7 +12,7 @@ namespace GLOO {
 class BoidNode : public SceneNode {
  public:
   BoidNode(const std::string& filename, const glm::vec3 position, const bool is_predator);
-  void UpdateBoids(double delta_time);
+  void UpdateBoid(double delta_time);
   void Run(const std::vector<BoidNode*>& boids,  SceneNode* attractive_object, bool object_active, double delta_time);
   // sets values from sliders
   void SetForceCoefficients(float wall_force, float predator_speed, float separation_force, float alignment_force, float cohesion_force, float attraction_force) {

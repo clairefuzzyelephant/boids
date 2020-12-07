@@ -29,7 +29,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const 
   }
   else {
     mat.GetMaterial().SetDiffuseColor(glm::vec3(50.f, 50.f, 50.f)/255.f);
-    inner_node->GetTransform().SetScale(glm::vec3(0.05));
+    inner_node->GetTransform().SetScale(glm::vec3(0.01));
     glm::quat rotation = glm::quat(glm::vec3(0, 180, 0));
     inner_node->GetTransform().SetRotation(rotation);
   }
@@ -48,7 +48,7 @@ BoidNode::BoidNode(const std::string& filename, const glm::vec3 position, const 
 
 }
 
-void BoidNode::UpdateBoids(double delta_time) {
+void BoidNode::UpdateBoid(double delta_time) {
   acceleration_ = acceleration_ * 0.5f; // dampen
   velocity_ = velocity_ + (acceleration_ * (float)delta_time);
   if (is_predator_) {
@@ -79,7 +79,12 @@ void BoidNode::UpdateBoids(double delta_time) {
   }
   mesh_node_->GetTransform().SetPosition(position_);
 
-  glm::quat rot = glm::quat(glm::vec3(0, -3.14/2.f, 0)) * glm::quatLookAt(glm::normalize(velocity_), glm::vec3(0, 1, 0));
+  glm::quat rot;
+  if (is_predator_) {
+    rot = glm::quat(glm::vec3(0, 1, 0)) * glm::quatLookAt(glm::normalize(velocity_), glm::vec3(0, 1, 0));
+  } else {
+    rot = glm::quat(glm::vec3(0, -3.14/2.f, 0)) * glm::quatLookAt(glm::normalize(velocity_), glm::vec3(0, 1, 0));
+  }
   mesh_node_->GetTransform().SetRotation(rot);
 
   acceleration_ = glm::vec3(0.f, 0.f, 0.f);
@@ -89,7 +94,7 @@ void BoidNode::UpdateBoids(double delta_time) {
 void BoidNode::Run(const std::vector<BoidNode*>& boids,  SceneNode* attractive_object, bool object_active, double delta_time)
 {
     Flock(boids, attractive_object, object_active, delta_time);
-    UpdateBoids(delta_time);
+    UpdateBoid(delta_time);
     // std::cout << "position" << glm::to_string(position_) << std::endl;
 }
 

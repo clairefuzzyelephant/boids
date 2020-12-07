@@ -136,7 +136,7 @@ void Flock::Update(double delta_time) {
   } else if (InputManager::GetInstance().IsKeyPressed('P')) {
     if (prev_released) {
       glm::vec3 pos = glm::vec3(rand()%5 * 0.2f, rand()%5 * 0.2f, rand()%5 * 0.2f);
-      auto predator = make_unique<BoidNode>("fork_blender.obj", pos, true);
+      auto predator = make_unique<BoidNode>("another_fork.obj", pos, true);
       addBoid(predator.get());
       AddChild(std::move(predator));
       std::cout << "added predator at " << glm::to_string(pos) << std::endl;
