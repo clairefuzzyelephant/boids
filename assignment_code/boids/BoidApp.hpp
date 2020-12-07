@@ -20,7 +20,7 @@ class BoidApp : public Application {
  private:
   void AddBorders(SceneNode& root);
   Flock* flock_;
-  float wall_force_slider_ = 35;
+  float wall_force_slider_ = 5;
   float predator_speed_slider_ = 0.98;
   float separation_force_slider_ = 5;
   float alignment_force_slider_ = 5;
