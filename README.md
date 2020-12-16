@@ -1,25 +1,27 @@
-# boids
+# Pierogoids (Boid Simulation)
 
-## Proposal 
-We propose implementing a boids model for a flock/school/herd of birds/fish/animals. This would extend assignment 3’s physically-based animation. The final product would be an executable that runs a boid simulation in a simple 3-dimensional world.
+## Background 
+The goal is to simulate 3D flocking behavior of groups of bird-like objects. We were inspired by the simplicity and realistic nature of existing boid simulations and wanted to implement our own twist.
 
-In particular, the project begins with implementing the 3 primary rules in Craig Reynolds’ original paper<sup>1</sup>:
+Boid simulations utilize relatively simple rules, but complex behaviors arise from the interplay between them. Without implementing any sort of AI or individual control for any boid, they collectively affect one another to create the flocking behavior seen.
+
+Additionally, we decided to inject our own creative twist to the traditional bird model. Instead of birds or triangles, our subjects were 3D pierogies<sup>0</sup>, and we added extensions such as user-input sliders, pierogi point-of-view, predator, and attractor.
+
+Our simulation is based on Craig Reynolds' boids paper<sup>1</sup> in 1987, which aimed to model flocking behavior of birds and produced a simulation that lay somewhere between predictability and randomness --- the so-called edge of chaos. The overarching concept is that the individual behavior of each bird matters less so than the holistic group behavior, which makes it easy to model with relatively simple mechanics.
+
+Boid simulations are still widely used, with a variety of extensions and changes. Beyond just video games, they have been used in swarm robotics for controlling UAVs, CGI bat swarms, and even for generating motions for armies on foot or horseback in movies and TV shows.
+
+Our boids model uses three main rules for simulation:
 * Collision Avoidance: avoid collisions with nearby flockmates
 * Velocity Matching: attempt to match velocity with nearby flockmates
 * Flock Centering: attempt to stay close to nearby flockmates
 
-Another important aspect in order to get interesting animations is adding non-boid objects to the scene, and implementing some form of object avoidance. There are various ways to approach this<sup>2</sup>, with varying complexity. A “force field” approach seems like it would work well for simple spheres/cylinders.
-
-In order for the animation to last longer than a few seconds in our field of view, adding boundaries will be necessary. These could be simple dimensions that the boids bounce off of or wrap to the other side at first, but could become closer to objects later.
-
-To start, each boid can be one of the small spheres already renderable via the starter code, but could be modified to a paper airplane-like shape or a simple bird model later.
-
-A stretch goal would be allowing users to click locations in the rendering to dynamically alter the direction the boids head toward. This would amount to implementing a simple attractor object, and moving it to a location in 3D space on click.
-
-Another extension for user interaction, time permitting, would be to add sliders allowing users to adjust the parameters of the various boid rules.
-
+Here is a demonstration of our results: https://youtu.be/30657Bs5SEA
 
 ## References
+Note: most of the starter code, especially in gloo/, are credited to Lingxiao Li, Yuanming Hu, and Dmitriy Smirnov at MIT. 
+
+<sup>0</sup> https://www.facebook.com/SKA.PW/posts/3403330286371177
 
 <sup>1</sup> http://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 
