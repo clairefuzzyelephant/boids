@@ -16,6 +16,13 @@ Our boids model uses three main rules for simulation:
 * Velocity Matching: attempt to match velocity with nearby flockmates
 * Flock Centering: attempt to stay close to nearby flockmates
 
+## Results
+Various forces can be adjusted by dragging and dropping the sliders on the left top corner. 
+Drop a predatory fork into the scene by pressing `P` on your keyboard.
+You can drop an attractor sphere into the scene by pressing `D`.
+Pierogi POV can be summoned by toggling `C`.
+
+
 Here is a demonstration of our results: https://youtu.be/30657Bs5SEA
 
 ## References
